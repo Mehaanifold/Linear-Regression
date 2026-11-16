@@ -1,0 +1,4164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Introduction to Machine Learning — Interactive Lecture Notes</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}]})"></script>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.27.0/plotly.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root{
+  --paper:#FAFAF6;--panel:#F1F3EE;--ink:#1A1F2E;--ink-soft:#4A5163;
+  --indigo:#3B528B;--teal:#1F8A85;--plum:#4A1E5C;--citron:#9A8B1E;
+  --rose:#B23A6B;--rule:#D9DCD4;
+  --radius:8px;--shadow:0 2px 8px rgba(26,31,46,.08);
+  --font-h:'Bricolage Grotesque',system-ui,sans-serif;
+  --font-b:'Source Serif 4',Georgia,serif;
+  --rail-w:250px;
+}
+/* ===== RESET ===== */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+/* ===== BASE TYPOGRAPHY ===== */
+body{font-family:var(--font-b);font-size:17.5px;line-height:1.66;color:var(--ink);background:var(--paper);overflow-x:hidden}
+h1,h2,h3,h4{font-family:var(--font-h);line-height:1.25}
+a{color:var(--indigo);text-decoration-thickness:1px;text-underline-offset:2px}
+a:hover{color:var(--teal)}
+code{font-size:.88em;background:var(--panel);padding:.1em .35em;border-radius:3px}
+strong{color:var(--ink)}
+/* ===== PROGRESS BAR ===== */
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--indigo),var(--teal));z-index:1000;width:0;transition:width .25s;pointer-events:none}
+/* ===== PAGE GRID ===== */
+.page-grid{display:grid;grid-template-columns:var(--rail-w) 1fr;min-height:100vh}
+/* ===== NAV RAIL ===== */
+#rail{position:sticky;top:0;height:100vh;overflow-y:auto;padding:1.5rem 1rem;border-right:1px solid var(--rule);background:var(--paper);z-index:100;scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+#rail::-webkit-scrollbar{width:4px}#rail::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
+#rail .toc-title{font-family:var(--font-h);font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);margin-bottom:.75rem}
+.toc-module{margin-bottom:1rem}
+.toc-module-title{font-family:var(--font-h);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);padding:.35rem 0 .15rem;border-top:1px solid var(--rule);margin-top:.5rem}
+#rail a{display:block;padding:.18rem .55rem;font-size:.8rem;color:var(--ink-soft);text-decoration:none;border-left:2px solid transparent;border-radius:0 3px 3px 0;transition:all .15s;line-height:1.4;font-family:var(--font-b)}
+#rail a:hover{color:var(--ink);background:var(--panel)}
+#rail a.active{color:var(--indigo);border-left-color:var(--indigo);font-weight:600;background:rgba(59,82,139,.06)}
+/* ===== MAIN CONTENT ===== */
+#content{max-width:58rem;padding:0 2.5rem 5rem;margin:0 auto}
+#content>*{max-width:69ch;margin-left:auto;margin-right:auto}
+#content>.block{max-width:100%}
+/* ===== HERO ===== */
+.hero{text-align:center;padding:4rem 2rem 3rem;margin-bottom:2.5rem;position:relative;overflow:hidden;max-width:100%!important}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:700;margin-bottom:.4rem}
+.hero .subtitle{font-size:1.05rem;color:var(--ink-soft);margin-bottom:1.5rem}
+.hero .hero-eq{font-size:1.3rem;padding:1rem 2rem;background:var(--panel);border-radius:var(--radius);display:inline-block;border:1px solid var(--rule)}
+.hero-bg{position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;opacity:.045;pointer-events:none}
+/* ===== MODULE DIVIDER ===== */
+.module-divider{margin:4rem auto 2rem;padding:1.5rem 0;border-top:3px solid var(--rule);max-width:69ch}
+.module-divider .mn{font-family:var(--font-h);font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--indigo);display:block;margin-bottom:.2rem}
+.module-divider h2{font-size:1.55rem;font-weight:700}
+/* ===== BLOCK (SECTION) ===== */
+.block{margin-bottom:2.5rem;padding:2rem 2rem 1.5rem;background:#fff;border:1px solid var(--rule);border-radius:var(--radius);position:relative;box-shadow:var(--shadow)}
+.block-badge{position:absolute;top:-12px;left:1.5rem;background:var(--indigo);color:#fff;font-family:var(--font-h);font-weight:700;font-size:.72rem;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.block h3{font-size:1.25rem;font-weight:700;margin-bottom:.35rem}
+.block .hook{font-style:italic;color:var(--indigo);margin-bottom:1rem;font-size:1rem}
+.block p+p{margin-top:.8rem}
+/* ===== WIDGET GRID ===== */
+.widget-grid{display:grid;grid-template-columns:15rem 1fr;gap:1rem;margin:1.5rem 0}
+.widget-full{display:block;margin:1.5rem 0}
+.widget-controls{background:var(--panel);padding:1rem;border-radius:var(--radius);display:flex;flex-direction:column;gap:.7rem;align-self:start}
+.widget-controls label{font-size:.82rem;font-weight:600;color:var(--ink-soft);display:flex;flex-direction:column;gap:.2rem}
+.widget-controls label span.val{font-family:'Courier New',monospace;color:var(--indigo);font-size:.8rem}
+.widget-controls input[type=range]{width:100%;accent-color:var(--indigo);cursor:pointer}
+.widget-controls input[type=number],.widget-controls input[type=text]{width:100%;padding:.3rem .5rem;border:1px solid var(--rule);border-radius:4px;font-family:var(--font-b);font-size:.85rem;background:#fff}
+.widget-controls select{width:100%;padding:.3rem .5rem;border:1px solid var(--rule);border-radius:4px;font-family:var(--font-b);font-size:.85rem;background:#fff}
+/* ===== BUTTONS ===== */
+.btn{padding:.4rem .8rem;border:1px solid var(--rule);border-radius:4px;background:#fff;cursor:pointer;font-family:var(--font-h);font-size:.78rem;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:.3rem}
+.btn:hover{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.btn:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.btn-primary{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.btn-primary:hover{background:var(--plum);border-color:var(--plum)}
+.btn-reset{background:transparent;color:var(--rose);border-color:var(--rose);font-size:.7rem;padding:.25rem .6rem}
+.btn-reset:hover{background:var(--rose);color:#fff}
+.btn-sm{font-size:.7rem;padding:.2rem .5rem}
+.btn-group{display:flex;flex-wrap:wrap;gap:.35rem}
+/* ===== PRESETS / SCENARIOS ===== */
+.presets{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.5rem}
+.presets button{font-size:.68rem;padding:.2rem .45rem;background:var(--panel);border:1px solid var(--rule);border-radius:3px;cursor:pointer;font-family:var(--font-h);transition:all .12s}
+.presets button:hover,.presets button.active{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+/* ===== WIDGET PLOT ===== */
+.widget-plot{min-height:300px;border-radius:var(--radius);overflow:hidden;position:relative}
+.widget-svg{width:100%;background:#fff;border:1px solid var(--rule);border-radius:var(--radius)}
+/* ===== READOUT ===== */
+.readout{font-family:'Courier New',monospace;font-size:.8rem;padding:.5rem .6rem;background:rgba(26,31,46,.035);border-radius:4px;line-height:1.6;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.readout b,.readout strong{color:var(--indigo)}
+/* ===== CHECK-YOURSELF ===== */
+details.check{margin:1rem 0;padding:.7rem 1rem;background:rgba(31,138,133,.05);border-left:3px solid var(--teal);border-radius:0 var(--radius) var(--radius) 0}
+details.check summary{cursor:pointer;font-weight:600;color:var(--teal);font-size:.92rem;list-style:none}
+details.check summary::before{content:'✓ '}
+details.check summary::-webkit-details-marker{display:none}
+details.check .ans{margin-top:.5rem;padding-top:.5rem;border-top:1px solid rgba(31,138,133,.12);color:var(--ink-soft);font-size:.92rem}
+/* ===== MISCONCEPTION ===== */
+.misconception{margin:1rem 0;padding:.7rem 1rem;background:rgba(178,58,107,.05);border-left:3px solid var(--rose);border-radius:0 var(--radius) var(--radius) 0;font-size:.92rem}
+.misconception::before{content:'⚠ Common Misconception';display:block;font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--rose);margin-bottom:.25rem}
+/* ===== CHALLENGE ===== */
+.challenge{margin:1.5rem 0;padding:1rem;background:rgba(74,30,92,.04);border:2px dashed var(--plum);border-radius:var(--radius)}
+.challenge .ch-title{font-family:var(--font-h);font-weight:700;font-size:.88rem;color:var(--plum);margin-bottom:.5rem}
+.challenge .ch-title::before{content:'🏆 '}
+.challenge.success{border-color:var(--teal);background:rgba(31,138,133,.06)}
+.challenge .ch-win{display:none;font-family:var(--font-h);font-weight:700;color:var(--teal);margin-top:.5rem}
+.challenge.success .ch-win{display:block}
+/* ===== NOTATION BOX ===== */
+.notation-box{margin:2rem auto;padding:1.5rem;background:var(--panel);border-radius:var(--radius);border:1px solid var(--rule)}
+.notation-box h3{font-size:1rem;margin-bottom:.7rem}
+.notation-box table{width:100%;font-size:.88rem;border-collapse:collapse}
+.notation-box td{padding:.2rem .5rem;vertical-align:top}
+.notation-box td:first-child{font-weight:600;white-space:nowrap;width:100px}
+.notation-box tr+tr td{border-top:1px solid rgba(0,0,0,.04)}
+/* ===== WIDGET PLACEHOLDER ===== */
+.widget-placeholder{text-align:center;padding:2.5rem 1rem;color:var(--ink-soft);font-size:.88rem;background:var(--panel);border-radius:var(--radius);border:1px dashed var(--rule)}
+/* ===== MATRIX DISPLAY ===== */
+.matrix-display{font-family:'Courier New',monospace;font-size:.78rem;overflow-x:auto;margin:.5rem 0}
+.matrix-display table{border-collapse:collapse}
+.matrix-display td{padding:.15rem .4rem;text-align:right;border:1px solid rgba(0,0,0,.06)}
+.matrix-display td.highlight{background:rgba(59,82,139,.12)}
+/* ===== PRESENTER MODE ===== */
+#presenter-toggle{position:fixed;bottom:1rem;right:1rem;z-index:200}
+body.presenter #rail{display:none}
+body.presenter .page-grid{grid-template-columns:1fr}
+body.presenter #content{max-width:1200px;font-size:22px}
+body.presenter .block h3{font-size:2rem}
+body.presenter .widget-grid{grid-template-columns:18rem 1fr}
+/* ===== RESPONSIVE ===== */
+@media(max-width:1000px){
+  .page-grid{grid-template-columns:1fr}
+  #rail{display:none}
+  #content{padding:0 1.5rem 3rem}
+  .widget-grid{grid-template-columns:1fr}
+  .widget-controls{flex-direction:row;flex-wrap:wrap}
+  .widget-controls label{min-width:45%}
+}
+@media(max-width:620px){
+  body{font-size:15px}
+  .block{padding:1.2rem 1rem 1rem}
+  #content{padding:0 .75rem 2rem}
+  .hero{padding:2rem 1rem}
+  .hero h1{font-size:1.7rem}
+  .widget-controls label{min-width:100%}
+}
+/* ===== PRINT ===== */
+@media print{
+  #rail,#presenter-toggle,#progress-bar,.btn-reset,.presets,.widget-controls button{display:none!important}
+  .page-grid{display:block}
+  .block{break-inside:avoid;box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}
+  .hero-bg{display:none}
+  body{font-size:11pt}
+}
+/* ===== REDUCED MOTION ===== */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0s!important;animation-delay:0s!important;transition-duration:0s!important}
+}
+/* ===== MISC ===== */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.mt-1{margin-top:.5rem}.mt-2{margin-top:1rem}.mb-1{margin-bottom:.5rem}.mb-2{margin-bottom:1rem}
+.text-center{text-align:center}
+.flex-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.text-sm{font-size:.85rem}
+.text-muted{color:var(--ink-soft)}
+.katex-display{margin:1rem 0!important}
+.side-by-side{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:700px){.side-by-side{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ===== PROGRESS BAR ===== -->
+<div id="progress-bar" role="progressbar" aria-label="Reading progress"></div>
+
+<div class="page-grid">
+<!-- ===== NAVIGATION RAIL ===== -->
+<nav id="rail" aria-label="Table of contents">
+  <div class="toc-title">Contents</div>
+
+  <div class="toc-module">
+    <div class="toc-module-title">Module 1 — Math Prerequisites</div>
+    <a href="#b1">1. Vectors</a>
+    <a href="#b2">2. Matrices</a>
+    <a href="#b3">3. Linear Systems</a>
+    <a href="#b4">4. Coordinate Systems</a>
+    <a href="#b5">5. Derivatives</a>
+    <a href="#b6">6. Gradients</a>
+    <a href="#b7">7. Maxima &amp; Minima</a>
+  </div>
+
+  <div class="toc-module">
+    <div class="toc-module-title">Module 2 — AI / ML Overview</div>
+    <a href="#b8">8. AI Timeline</a>
+    <a href="#b9">9. AI ⊃ ML ⊃ DL</a>
+    <a href="#b10">10. Rules vs Learning</a>
+    <a href="#b11">11. ML Categories</a>
+    <a href="#b12">12. Session Roadmap</a>
+  </div>
+
+  <div class="toc-module">
+    <div class="toc-module-title">Module 3 — Regression</div>
+    <a href="#b13">13. Matrix Form</a>
+    <a href="#b14">14. Line &amp; Plane</a>
+    <a href="#b15">15. OLS &amp; Projection</a>
+    <a href="#b16">16. Loss Contours</a>
+    <a href="#b17">17. Closed-Form</a>
+    <a href="#b18">18. Gradient Descent</a>
+    <a href="#b19">19. Learning Rate</a>
+    <a href="#b20">20. Feature Scaling</a>
+    <a href="#b21">21. Batch vs SGD</a>
+    <a href="#b22">22. Bias &amp; Variance</a>
+    <a href="#b23">23. Validation</a>
+    <a href="#b24">24. Regularization</a>
+  </div>
+
+  <div class="toc-module">
+    <div class="toc-module-title">Module 4 — Capstone</div>
+    <a href="#b25">25. Playground &amp; Quiz</a>
+  </div>
+</nav>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main id="content">
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <svg class="hero-bg" viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <pattern id="hg" width="32" height="32" patternUnits="userSpaceOnUse">
+        <path d="M32 0L0 0 0 32" fill="none" stroke="#3B528B" stroke-width=".6"/>
+      </pattern>
+    </defs>
+    <rect width="900" height="300" fill="url(#hg)"/>
+    <g fill="#3B528B">
+      <circle cx="95" cy="210" r="3.5"/><circle cx="160" cy="175" r="3.5"/><circle cx="230" cy="190" r="3.5"/>
+      <circle cx="310" cy="140" r="3.5"/><circle cx="390" cy="130" r="3.5"/><circle cx="460" cy="105" r="3.5"/>
+      <circle cx="540" cy="90" r="3.5"/><circle cx="620" cy="70" r="3.5"/><circle cx="700" cy="55" r="3.5"/>
+      <circle cx="780" cy="42" r="3.5"/>
+    </g>
+    <line x1="60" y1="230" x2="820" y2="25" stroke="#1F8A85" stroke-width="2" stroke-dasharray="7,5" opacity=".5"/>
+    <g stroke="#B23A6B" stroke-width=".8" opacity=".35">
+      <line x1="95" y1="210" x2="95" y2="219"/><line x1="160" y1="175" x2="160" y2="196"/>
+      <line x1="310" y1="140" x2="310" y2="145"/><line x1="540" y1="90" x2="540" y2="97"/>
+    </g>
+  </svg>
+  <h1>Introduction to Machine Learning</h1>
+  <p class="subtitle">Interactive Lecture Notes — From Vectors to Regularized Regression</p>
+  <div class="hero-eq">$$\mathbf{y} = \mathbf{X}\mathbf{w} + \boldsymbol{\varepsilon}$$</div>
+</header>
+
+<!-- ===== NOTATION BOX ===== -->
+<div class="notation-box">
+  <h3>📖 Notation Guide</h3>
+  <table>
+    <tr><td>\(\mathbf{X}\)</td><td>Design matrix (\(n \times d\)), includes a column of 1s for the bias</td></tr>
+    <tr><td>\(\mathbf{w}\)</td><td>Parameter (weight) vector, length \(d\)</td></tr>
+    <tr><td>\(\mathbf{y}\)</td><td>Target (response) vector, length \(n\)</td></tr>
+    <tr><td>\(\hat{\mathbf{y}}\)</td><td>Predictions: \(\hat{\mathbf{y}} = \mathbf{X}\mathbf{w}\)</td></tr>
+    <tr><td>\(\mathbf{r}\)</td><td>Residual vector: \(\mathbf{r} = \mathbf{y} - \hat{\mathbf{y}}\)</td></tr>
+    <tr><td>\(J(\mathbf{w})\)</td><td>Loss (cost) function — how wrong the model is</td></tr>
+    <tr><td>\(\lambda\)</td><td>Regularization strength</td></tr>
+    <tr><td>\(\alpha\)</td><td>Learning rate (step size in gradient descent)</td></tr>
+    <tr><td>\(n, d\)</td><td>Number of samples, number of features (incl. bias)</td></tr>
+  </table>
+</div>
+
+<!-- ==================== MODULE 1 ==================== -->
+<div class="module-divider" id="mod1">
+  <span class="mn">Module 1</span>
+  <h2>Mathematical Prerequisites</h2>
+</div>
+
+<section class="block" id="b1">
+  <div class="block-badge">1</div>
+  <h3>Vectors in 2D</h3>
+  <p class="hook">What happens when you combine two arrows — and what does it mean for data?</p>
+  <div id="w1_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b2">
+  <div class="block-badge">2</div>
+  <h3>Matrices as Transformations</h3>
+  <p class="hook">How can four numbers reshape all of space?</p>
+  <div id="w2_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b3">
+  <div class="block-badge">3</div>
+  <h3>Linear Systems: Ax = b</h3>
+  <p class="hook">When do two lines always cross — and when don't they?</p>
+  <div id="w3_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b4">
+  <div class="block-badge">4</div>
+  <h3>Coordinate Systems &amp; Data</h3>
+  <p class="hook">Why do we need more than two dimensions?</p>
+  <div id="w4_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b5">
+  <div class="block-badge">5</div>
+  <h3>Derivatives &amp; Tangent Lines</h3>
+  <p class="hook">How fast is something changing <em>right now</em>?</p>
+  <div id="w5_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b6">
+  <div class="block-badge">6</div>
+  <h3>Gradients in 2D</h3>
+  <p class="hook">Which way is uphill — and can we use that to find the bottom?</p>
+  <div id="w6_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b7">
+  <div class="block-badge">7</div>
+  <h3>Maxima, Minima &amp; Saddle Points</h3>
+  <p class="hook">How do you tell a hilltop from a valley from a mountain pass?</p>
+  <div id="w7_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<!-- ==================== MODULE 2 ==================== -->
+<div class="module-divider" id="mod2">
+  <span class="mn">Module 2</span>
+  <h2>Overview of AI &amp; Machine Learning</h2>
+</div>
+
+<section class="block" id="b8">
+  <div class="block-badge">8</div>
+  <h3>A Brief History of AI</h3>
+  <p class="hook">How did we get from Turing to transformers?</p>
+  <div id="w8_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b9">
+  <div class="block-badge">9</div>
+  <h3>AI ⊃ ML ⊃ Deep Learning</h3>
+  <p class="hook">What's the difference between artificial intelligence, machine learning, and deep learning?</p>
+  <div id="w9_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b10">
+  <div class="block-badge">10</div>
+  <h3>Rules vs Learning from Data</h3>
+  <p class="hook">Why can't we just write if-then rules for everything?</p>
+  <div id="w10_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b11">
+  <div class="block-badge">11</div>
+  <h3>Flavours of Machine Learning</h3>
+  <p class="hook">What are the different ways a machine can learn?</p>
+  <div id="w11_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b12">
+  <div class="block-badge">12</div>
+  <h3>Session Roadmap</h3>
+  <p class="hook">Where are we headed today — and what comes later?</p>
+  <div id="w12_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<!-- ==================== MODULE 3 ==================== -->
+<div class="module-divider" id="mod3">
+  <span class="mn">Module 3</span>
+  <h2>Regression — From Data to Prediction</h2>
+</div>
+
+<section class="block" id="b13">
+  <div class="block-badge">13</div>
+  <h3>The Matrix Form: y = Xw</h3>
+  <p class="hook">How does a spreadsheet of data become a matrix equation?</p>
+  <div id="w13_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b14">
+  <div class="block-badge">14</div>
+  <h3>Fitting a Line and a Plane</h3>
+  <p class="hook">Can you find the line (or plane) that best fits these points?</p>
+  <div id="w14_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b15">
+  <div class="block-badge">15</div>
+  <h3>OLS &amp; the Geometry of Projection</h3>
+  <p class="hook">Why is the best fit literally a shadow?</p>
+  <div id="w15_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b16">
+  <div class="block-badge">16</div>
+  <h3>The Loss Landscape</h3>
+  <p class="hook">What does the "error surface" look like — and why does its shape matter?</p>
+  <div id="w16_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b17">
+  <div class="block-badge">17</div>
+  <h3>The Closed-Form Solution</h3>
+  <p class="hook">Can we solve for the best weights in one shot?</p>
+  <div id="w17_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b18">
+  <div class="block-badge">18</div>
+  <h3>Gradient Descent</h3>
+  <p class="hook">How do you roll downhill to find the best answer?</p>
+  <div id="w18_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b19">
+  <div class="block-badge">19</div>
+  <h3>Learning Rate</h3>
+  <p class="hook">How big should each step be — and what goes wrong if you get it wrong?</p>
+  <div id="w19_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b20">
+  <div class="block-badge">20</div>
+  <h3>Feature Scaling</h3>
+  <p class="hook">Why do units matter to an optimisation algorithm?</p>
+  <div id="w20_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b21">
+  <div class="block-badge">21</div>
+  <h3>Batch, Mini-batch &amp; SGD</h3>
+  <p class="hook">Must we look at all the data every step?</p>
+  <div id="w21_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b22">
+  <div class="block-badge">22</div>
+  <h3>Bias–Variance Trade-off</h3>
+  <p class="hook">Why does a perfect fit on training data often fail on new data?</p>
+  <div id="w22_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b23">
+  <div class="block-badge">23</div>
+  <h3>Validation &amp; Cross-Validation</h3>
+  <p class="hook">How do you know if your model will work on data it hasn't seen?</p>
+  <div id="w23_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<section class="block" id="b24">
+  <div class="block-badge">24</div>
+  <h3>Regularization: Ridge &amp; Lasso</h3>
+  <p class="hook">Can we prevent overfitting by penalizing complexity?</p>
+  <div id="w24_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+<!-- ==================== MODULE 4 ==================== -->
+<div class="module-divider" id="mod4">
+  <span class="mn">Module 4</span>
+  <h2>Capstone Playground</h2>
+</div>
+
+<section class="block" id="b25">
+  <div class="block-badge">25</div>
+  <h3>Playground &amp; Quiz</h3>
+  <p class="hook">Put it all together — can you build a good regression model?</p>
+  <div id="w25_area" class="widget-area"><div class="widget-placeholder">⏳ Widget loads on scroll…</div></div>
+</section>
+
+</main>
+</div><!-- /page-grid -->
+
+<!-- PRESENTER MODE TOGGLE -->
+<button id="presenter-toggle" class="btn btn-primary" aria-label="Toggle presenter mode">Presenter Mode</button>
+
+<!-- ===================================================================== -->
+<!-- SHARED ENGINE + INFRASTRUCTURE                                        -->
+<!-- ===================================================================== -->
+<script>
+"use strict";
+
+/* ============================================================
+   ML — Shared computation engine
+   All linear algebra, RNG, datasets, losses, and GD live here.
+   Every widget uses this. Nothing is pre-baked.
+   ============================================================ */
+const ML = (function(){
+
+  // ---------- Linear Algebra ----------
+
+  const zeros = (r,c)=>Array.from({length:r},()=>new Float64Array(c));
+  const eye = n=>{const I=zeros(n,n);for(let i=0;i<n;i++)I[i][i]=1;return I};
+
+  function transpose(A){
+    const r=A.length, c=A[0].length, T=zeros(c,r);
+    for(let i=0;i<r;i++) for(let j=0;j<c;j++) T[j][i]=A[i][j];
+    return T;
+  }
+
+  function matmul(A,B){
+    const rA=A.length, cA=A[0].length, cB=B[0].length, C=zeros(rA,cB);
+    for(let i=0;i<rA;i++) for(let k=0;k<cA;k++){
+      const a=A[i][k];
+      for(let j=0;j<cB;j++) C[i][j]+=a*B[k][j];
+    }
+    return C;
+  }
+
+  function matvec(A,x){
+    return A.map(row=>{let s=0;for(let j=0;j<row.length;j++)s+=row[j]*x[j];return s});
+  }
+
+  const dot=(a,b)=>{let s=0;for(let i=0;i<a.length;i++)s+=a[i]*b[i];return s};
+  const vnorm=v=>Math.sqrt(dot(v,v));
+  const vadd=(a,b)=>a.map((ai,i)=>ai+b[i]);
+  const vsub=(a,b)=>a.map((ai,i)=>ai-b[i]);
+  const vscale=(s,v)=>v.map(vi=>s*vi);
+
+  /* Gauss-Jordan with partial pivoting. Returns null if singular. */
+  function solve(A,b){
+    const n=A.length;
+    const M=A.map((row,i)=>[...row,b[i]]);
+    for(let col=0;col<n;col++){
+      let mx=Math.abs(M[col][col]),mr=col;
+      for(let r=col+1;r<n;r++){const v=Math.abs(M[r][col]);if(v>mx){mx=v;mr=r}}
+      if(mx<1e-12)return null;
+      [M[col],M[mr]]=[M[mr],M[col]];
+      const piv=M[col][col];
+      for(let j=col;j<=n;j++)M[col][j]/=piv;
+      for(let r=0;r<n;r++){
+        if(r===col)continue;
+        const f=M[r][col];
+        for(let j=col;j<=n;j++)M[r][j]-=f*M[col][j];
+      }
+    }
+    return M.map(r=>r[n]);
+  }
+
+  function inverse(A){
+    const n=A.length;
+    const M=A.map((row,i)=>{
+      const r=new Array(2*n);
+      for(let j=0;j<n;j++){r[j]=row[j];r[j+n]=(i===j)?1:0}
+      return r;
+    });
+    for(let col=0;col<n;col++){
+      let mx=Math.abs(M[col][col]),mr=col;
+      for(let r=col+1;r<n;r++){const v=Math.abs(M[r][col]);if(v>mx){mx=v;mr=r}}
+      if(mx<1e-12)return null;
+      [M[col],M[mr]]=[M[mr],M[col]];
+      const piv=M[col][col];
+      for(let j=0;j<2*n;j++)M[col][j]/=piv;
+      for(let r=0;r<n;r++){
+        if(r===col)continue;
+        const f=M[r][col];
+        for(let j=0;j<2*n;j++)M[r][j]-=f*M[col][j];
+      }
+    }
+    return M.map(r=>r.slice(n));
+  }
+
+  /* 2×2 symmetric eigen-decomposition: [[a,b],[b,d]] */
+  function eigen2x2Sym(a,b,d){
+    const tr=a+d, det=a*d-b*b;
+    const disc=Math.sqrt(Math.max(0,tr*tr/4-det));
+    const l1=tr/2+disc, l2=tr/2-disc;
+    let v1,v2;
+    if(Math.abs(b)>1e-12){
+      v1=[l1-d,b]; v2=[l2-d,b];
+    }else{
+      v1=a>=d?[1,0]:[0,1]; v2=a>=d?[0,1]:[1,0];
+    }
+    const n1=vnorm(v1),n2=vnorm(v2);
+    if(n1>1e-15)v1=vscale(1/n1,v1);
+    if(n2>1e-15)v2=vscale(1/n2,v2);
+    return {values:[l1,l2],vectors:[v1,v2]};
+  }
+
+  function conditionNumber(A){
+    const Ainv=inverse(A);
+    if(!Ainv)return Infinity;
+    const frob=M=>Math.sqrt(M.reduce((s,row)=>s+row.reduce((rs,v)=>rs+v*v,0),0));
+    return frob(A)*frob(Ainv);
+  }
+
+  function det2x2(a,b,c,d){return a*d-b*c}
+
+  // ---------- Seeded RNG (LCG + Box-Muller) ----------
+
+  class SeededRNG{
+    constructor(seed=42){this.s=seed>>>0}
+    next(){this.s=(this.s*1664525+1013904223)>>>0;return this.s/0x100000000}
+    normal(mu=0,sig=1){
+      const u1=this.next()+1e-10,u2=this.next();
+      return mu+sig*Math.sqrt(-2*Math.log(u1))*Math.cos(6.283185307*u2);
+    }
+    shuffle(arr){
+      const a=[...arr];
+      for(let i=a.length-1;i>0;i--){const j=Math.floor(this.next()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+      return a;
+    }
+  }
+
+  // ---------- Dataset Generators ----------
+
+  function noisyLine(n,w0,w1,noise,seed=42){
+    const rng=new SeededRNG(seed), x=[], y=[];
+    for(let i=0;i<n;i++){const xi=-5+10*rng.next();x.push(xi);y.push(w0+w1*xi+rng.normal(0,noise))}
+    return {x,y};
+  }
+
+  function noisyPlane(n,w0,w1,w2,noise,seed=42){
+    const rng=new SeededRNG(seed),x1=[],x2=[],y=[];
+    for(let i=0;i<n;i++){
+      const a=-5+10*rng.next(),b=-5+10*rng.next();
+      x1.push(a);x2.push(b);y.push(w0+w1*a+w2*b+rng.normal(0,noise));
+    }
+    return {x1,x2,y};
+  }
+
+  function polyWithNoise(n,coeffs,noise,xRange=[-3,3],seed=42){
+    const rng=new SeededRNG(seed),x=[],y=[];
+    const lo=xRange[0],span=xRange[1]-xRange[0];
+    for(let i=0;i<n;i++){
+      const xi=lo+span*rng.next(); x.push(xi);
+      let yi=0;for(let p=0;p<coeffs.length;p++)yi+=coeffs[p]*Math.pow(xi,p);
+      y.push(yi+rng.normal(0,noise));
+    }
+    return {x,y};
+  }
+
+  function correlatedFeatures(n,r,seed=42){
+    const rng=new SeededRNG(seed),x1=[],x2=[];
+    const r2=Math.sqrt(Math.max(0,1-r*r));
+    for(let i=0;i<n;i++){const z1=rng.normal(),z2=rng.normal();x1.push(z1);x2.push(r*z1+r2*z2)}
+    return {x1,x2};
+  }
+
+  function housePriceData(n,seed=42){
+    const rng=new SeededRNG(seed),sqft=[],beds=[],price=[];
+    for(let i=0;i<n;i++){
+      const s=800+2200*rng.next(),b=1+Math.floor(4*rng.next());
+      sqft.push(s);beds.push(b);price.push(50+.1*s+15*b+rng.normal(0,20));
+    }
+    return {sqft,beds,price};
+  }
+
+  // ---------- Design Matrix ----------
+
+  function designMatrix(featureArrays){
+    // featureArrays: [[x1_0,...],[x2_0,...],...]
+    const n=featureArrays[0].length,X=[];
+    for(let i=0;i<n;i++){const row=[1];for(const f of featureArrays)row.push(f[i]);X.push(row)}
+    return X;
+  }
+
+  // ---------- Loss Functions ----------
+
+  function predictions(X,w){return matvec(X,w)}
+  function residuals(X,y,w){const yh=predictions(X,w);return y.map((yi,i)=>yi-yh[i])}
+
+  function mseLoss(X,y,w){const r=residuals(X,y,w);return dot(r,r)/r.length}
+  function sseLoss(X,y,w){const r=residuals(X,y,w);return dot(r,r)}
+
+  function ridgeLoss(X,y,w,lam){
+    return mseLoss(X,y,w)+lam*w.slice(1).reduce((s,wi)=>s+wi*wi,0);
+  }
+  function lassoLoss(X,y,w,lam){
+    return mseLoss(X,y,w)+lam*w.slice(1).reduce((s,wi)=>s+Math.abs(wi),0);
+  }
+
+  function mseGradient(X,y,w){
+    const n=X.length,r=residuals(X,y,w),Xt=transpose(X);
+    return matvec(Xt,r).map(g=>-2*g/n);
+  }
+  function ridgeGradient(X,y,w,lam){
+    const g=mseGradient(X,y,w);
+    return g.map((gi,i)=>i===0?gi:gi+2*lam*w[i]);
+  }
+
+  function rSquared(X,y,w){
+    const yh=predictions(X,w),ym=y.reduce((a,b)=>a+b,0)/y.length;
+    const ssTot=y.reduce((s,yi)=>s+(yi-ym)**2,0);
+    const ssRes=y.reduce((s,yi,i)=>s+(yi-yh[i])**2,0);
+    return ssTot<1e-15?1:1-ssRes/ssTot;
+  }
+
+  // ---------- Closed-Form Solvers ----------
+
+  function olsSolve(X,y){
+    const Xt=transpose(X),XtX=matmul(Xt,X),Xty=matvec(Xt,y);
+    return solve(XtX,Xty);
+  }
+  function ridgeSolve(X,y,lam){
+    const Xt=transpose(X),XtX=matmul(Xt,X).map(r=>[...r]);
+    for(let i=1;i<XtX.length;i++)XtX[i][i]+=lam;
+    return solve(XtX,matvec(Xt,y));
+  }
+
+  // ---------- Gradient Descent Engine ----------
+
+  function gdStep(X,y,w,lr,gradFn,batchSize,rng){
+    const n=X.length;let Xb=X,yb=y;
+    if(batchSize<n){
+      const idx=rng?rng.shuffle([...Array(n).keys()]).slice(0,batchSize):
+                    [...Array(n).keys()].slice(0,batchSize);
+      Xb=idx.map(i=>X[i]);yb=idx.map(i=>y[i]);
+    }
+    const grad=gradFn(Xb,yb,w);
+    return {w:w.map((wi,i)=>wi-lr*grad[i]),grad};
+  }
+
+  function runGD(X,y,w0,lr,maxIter,gradFn,batchSize,seed=42){
+    batchSize=batchSize||X.length;
+    const rng=new SeededRNG(seed);
+    const hist=[{w:[...w0],loss:mseLoss(X,y,w0),grad:null,iter:0}];
+    let w=[...w0];
+    for(let i=1;i<=maxIter;i++){
+      const{w:wn,grad}=gdStep(X,y,w,lr,gradFn,batchSize,rng);
+      w=wn;
+      const loss=mseLoss(X,y,w);
+      hist.push({w:[...w],loss,grad,iter:i});
+      if(!isFinite(loss)||loss>1e15)break;
+    }
+    return hist;
+  }
+
+  // ---------- Statistics ----------
+
+  const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
+  const std=a=>{const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/a.length)};
+
+  function standardize(arr){
+    const m=mean(arr),s=std(arr)||1;
+    return {data:arr.map(v=>(v-m)/s),mean:m,std:s};
+  }
+  function minmax(arr){
+    const lo=Math.min(...arr),hi=Math.max(...arr),span=hi-lo||1;
+    return {data:arr.map(v=>(v-lo)/span),min:lo,max:hi};
+  }
+
+  // ---------- Utilities ----------
+
+  function fmt(v,d=3){
+    if(typeof v!=='number'||isNaN(v))return 'NaN';
+    if(!isFinite(v))return v>0?'∞':'−∞';
+    return d===0?Math.round(v).toString():v.toFixed(d);
+  }
+  const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+
+  /* Lazy-init via IntersectionObserver */
+  const _inited=new Set();
+  function lazyInit(id,fn){
+    const el=document.getElementById(id);
+    if(!el)return;
+    const obs=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting&&!_inited.has(id)){
+          _inited.add(id);
+          try{fn()}catch(err){
+            console.error('Widget init error ('+id+'):',err);
+            el.innerHTML='<div class="widget-placeholder" style="color:var(--rose)">Widget error — see console.</div>';
+          }
+          obs.unobserve(el);
+        }
+      });
+    },{rootMargin:'300px'});
+    obs.observe(el);
+  }
+
+  /* Throttle redraws with rAF */
+  function throttledRedraw(fn){
+    let p=false;
+    return function(...a){if(!p){p=true;requestAnimationFrame(()=>{fn(...a);p=false})}};
+  }
+
+  /* Plotly layout defaults matching our design system */
+  const plotColors={
+    data:'#3B528B',model:'#1F8A85',residual:'#B23A6B',
+    gradient:'#4A1E5C',constraint:'#9A8B1E',paper:'#FAFAF6',grid:'#D9DCD4'
+  };
+  function plotLayout(extra={}){
+    const base={
+      paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'#fff',
+      font:{family:'Source Serif 4, serif',size:12,color:'#1A1F2E'},
+      margin:{l:48,r:16,t:32,b:40},
+      xaxis:{gridcolor:'#E8EAE4',zerolinecolor:'#D9DCD4'},
+      yaxis:{gridcolor:'#E8EAE4',zerolinecolor:'#D9DCD4'},
+    };
+    return Object.assign(base,extra);
+  }
+  const plotConfig={responsive:true,displayModeBar:false};
+
+  return {
+    /* LA */ zeros,eye,transpose,matmul,matvec,dot,vnorm,vadd,vsub,vscale,
+    solve,inverse,eigen2x2Sym,conditionNumber,det2x2,
+    /* RNG */ SeededRNG,
+    /* Data */ noisyLine,noisyPlane,polyWithNoise,correlatedFeatures,housePriceData,designMatrix,
+    /* Loss */ predictions,residuals,mseLoss,sseLoss,ridgeLoss,lassoLoss,
+    mseGradient,ridgeGradient,rSquared,olsSolve,ridgeSolve,
+    /* GD */ gdStep,runGD,
+    /* Stats */ mean,std,standardize,minmax,
+    /* Utils */ fmt,clamp,lazyInit,throttledRedraw,plotColors,plotLayout,plotConfig,
+  };
+})();
+
+
+/* ============================================================
+   INFRASTRUCTURE — ToC, progress, keyboard, presenter mode
+   ============================================================ */
+
+/* --- Table of contents highlighting --- */
+(function(){
+  const blocks=document.querySelectorAll('.block');
+  const links=document.querySelectorAll('#rail a');
+  const linkMap={};
+  links.forEach(l=>{const h=l.getAttribute('href');if(h)linkMap[h.slice(1)]=l});
+
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        links.forEach(l=>l.classList.remove('active'));
+        const lk=linkMap[e.target.id];
+        if(lk)lk.classList.add('active');
+      }
+    });
+  },{rootMargin:'-18% 0px -72% 0px'});
+  blocks.forEach(b=>obs.observe(b));
+})();
+
+/* --- Scroll progress bar --- */
+(function(){
+  const bar=document.getElementById('progress-bar');
+  let ticking=false;
+  window.addEventListener('scroll',()=>{
+    if(!ticking){ticking=true;requestAnimationFrame(()=>{
+      const h=document.documentElement;
+      bar.style.width=((h.scrollTop/(h.scrollHeight-h.clientHeight))*100)+'%';
+      ticking=false;
+    })}
+  },{passive:true});
+})();
+
+/* --- Keyboard navigation (j / k) --- */
+(function(){
+  const blocks=[...document.querySelectorAll('.block')];
+  document.addEventListener('keydown',e=>{
+    const t=e.target.tagName;
+    if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT'||e.target.isContentEditable)return;
+    if(e.key!=='j'&&e.key!=='k')return;
+    e.preventDefault();
+    const sy=window.scrollY+window.innerHeight/3;
+    let cur=0;
+    for(let i=0;i<blocks.length;i++)if(blocks[i].offsetTop<=sy)cur=i;
+    const next=e.key==='j'?Math.min(cur+1,blocks.length-1):Math.max(cur-1,0);
+    blocks[next].scrollIntoView({behavior:'smooth',block:'start'});
+  });
+})();
+
+/* --- Presenter mode toggle --- */
+(function(){
+  const btn=document.getElementById('presenter-toggle');
+  btn.addEventListener('click',()=>{
+    document.body.classList.toggle('presenter');
+    btn.textContent=document.body.classList.contains('presenter')?'Exit Presenter':'Presenter Mode';
+    setTimeout(()=>{
+      document.querySelectorAll('.js-plotly-plot').forEach(p=>Plotly.Plots.resize(p));
+    },350);
+  });
+})();
+
+/* --- Resize all Plotly plots on window resize --- */
+(function(){
+  let t;
+  window.addEventListener('resize',()=>{
+    clearTimeout(t);
+    t=setTimeout(()=>{
+      document.querySelectorAll('.js-plotly-plot').forEach(p=>Plotly.Plots.resize(p));
+    },200);
+  });
+})();
+
+/* ============================================================
+   WIDGET INITIALIZERS — inserted by subsequent build stages
+   Each widget is an IIFE registered via ML.lazyInit('wN_area', fn)
+   ============================================================ */
+
+
+// === MODULE 1 WIDGETS ===
+/* =========================================================
+   MODULE 1 WIDGETS
+   ========================================================= */
+
+/* WIDGET 1: VECTORS */
+/* HTML Content: (Injected via innerHTML below) */
+ML.lazyInit('w1_area', function() {
+  const area = document.getElementById('w1_area');
+  area.innerHTML = `
+    <p>Vectors are the fundamental building blocks of machine learning. You can think of a vector as an arrow pointing in space, possessing both a direction and a magnitude (length). In data terms, a vector is simply a list of numbers—each number representing a feature of a single data point.</p>
+    <p>When we combine vectors through addition, we follow the "parallelogram rule," chaining them tip-to-tail. When we multiply a vector by a scalar (a regular number), we stretch or shrink it. The <strong>dot product</strong> tells us how much two vectors align, which is critical for finding angles and projections.</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>Vector a (x): <span class="val" id="w1_ax_val">3</span><input type="range" id="w1_ax" min="-10" max="10" step="0.1" value="3"></label>
+        <label>Vector a (y): <span class="val" id="w1_ay_val">2</span><input type="range" id="w1_ay" min="-10" max="10" step="0.1" value="2"></label>
+        <label>Vector b (x): <span class="val" id="w1_bx_val">1</span><input type="range" id="w1_bx" min="-10" max="10" step="0.1" value="1"></label>
+        <label>Vector b (y): <span class="val" id="w1_by_val">-3</span><input type="range" id="w1_by" min="-10" max="10" step="0.1" value="-3"></label>
+        <label>Scalar c (for c·a): <span class="val" id="w1_c_val">1.5</span><input type="range" id="w1_c" min="-3" max="3" step="0.1" value="1.5"></label>
+        <div class="presets mt-1">
+          <button id="w1_mode_add" class="active">Show a + b</button>
+          <button id="w1_mode_scale">Show c·a</button>
+          <button id="w1_mode_proj">Show Proj_b(a)</button>
+        </div>
+        <button class="btn btn-reset mt-1" id="w1_reset">Reset</button>
+      </div>
+      <div class="widget-plot" style="display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1rem;">
+        <svg id="w1_svg" viewBox="-12 -12 24 24" style="width:100%; max-width:400px; height:auto; overflow:visible; transform: scaleY(-1);">
+          <g id="w1_grid"></g>
+          <g id="w1_draw"></g>
+        </svg>
+      </div>
+    </div>
+    <div class="readout" id="w1_readout"></div>
+    <details class="check">
+      <summary>What happens to the dot product if the vectors are perpendicular?</summary>
+      <div class="ans">If two vectors are exactly perpendicular, their dot product is zero. The angle between them is 90° (or \\(\\pi/2\\) radians), and \\(\\cos(90^\\circ) = 0\\). This means they share no components in the same direction!</div>
+    </details>
+    <div class="misconception">A common mistake is thinking the dot product returns a vector. The dot product of two vectors is a <strong>scalar</strong> (a single number), which is why it's also called the scalar product.</div>
+  `;
+
+  const ax = document.getElementById('w1_ax'), ay = document.getElementById('w1_ay');
+  const bx = document.getElementById('w1_bx'), by = document.getElementById('w1_by');
+  const cs = document.getElementById('w1_c');
+  const grid = document.getElementById('w1_grid'), draw = document.getElementById('w1_draw');
+  const readout = document.getElementById('w1_readout');
+  let mode = 'add'; // add, scale, proj
+
+  document.getElementById('w1_mode_add').onclick = (e) => setMode('add', e.target);
+  document.getElementById('w1_mode_scale').onclick = (e) => setMode('scale', e.target);
+  document.getElementById('w1_mode_proj').onclick = (e) => setMode('proj', e.target);
+  document.getElementById('w1_reset').onclick = () => { ax.value=3; ay.value=2; bx.value=1; by.value=-3; cs.value=1.5; update(); };
+
+  function setMode(m, btn) {
+    mode = m;
+    ['add','scale','proj'].forEach(x => document.getElementById('w1_mode_'+x).classList.remove('active'));
+    btn.classList.add('active');
+    update();
+  }
+
+  // Draw grid
+  let gridHTML = `
+    <line x1="-12" y1="0" x2="12" y2="0" stroke="var(--rule)" stroke-width="0.1" />
+    <line x1="0" y1="-12" x2="0" y2="12" stroke="var(--rule)" stroke-width="0.1" />
+  `;
+  for(let i=-10; i<=10; i+=2) {
+    if(i===0) continue;
+    gridHTML += `<line x1="${i}" y1="-12" x2="${i}" y2="12" stroke="var(--rule)" stroke-width="0.05" />`;
+    gridHTML += `<line x1="-12" y1="${i}" x2="12" y2="${i}" stroke="var(--rule)" stroke-width="0.05" />`;
+  }
+  grid.innerHTML = gridHTML;
+
+  function arrow(x, y, col, w=0.2, dash=false) {
+    const len = Math.hypot(x,y);
+    if(len < 0.01) return '';
+    const nx = x/len, ny = y/len;
+    const hx = x - nx*0.8 - ny*0.4;
+    const hy = y - ny*0.8 + nx*0.4;
+    const hx2 = x - nx*0.8 + ny*0.4;
+    const hy2 = y - ny*0.8 - nx*0.4;
+    const s = dash ? `stroke-dasharray="0.5,0.5"` : '';
+    return `
+      <line x1="0" y1="0" x2="${x}" y2="${y}" stroke="${col}" stroke-width="${w}" ${s} stroke-linecap="round"/>
+      <polygon points="${x},${y} ${hx},${hy} ${hx2},${hy2}" fill="${col}" />
+    `;
+  }
+  function line(x1,y1,x2,y2,col,w=0.1,dash=true) {
+    const s = dash ? `stroke-dasharray="0.5,0.5"` : '';
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${w}" ${s}/>`;
+  }
+
+  const update = ML.throttledRedraw(() => {
+    const a = [parseFloat(ax.value), parseFloat(ay.value)];
+    const b = [parseFloat(bx.value), parseFloat(by.value)];
+    const c = parseFloat(cs.value);
+    document.getElementById('w1_ax_val').innerText = a[0]; document.getElementById('w1_ay_val').innerText = a[1];
+    document.getElementById('w1_bx_val').innerText = b[0]; document.getElementById('w1_by_val').innerText = b[1];
+    document.getElementById('w1_c_val').innerText = c;
+
+    let drawHTML = arrow(a[0], a[1], ML.plotColors.data, 0.2); // a (indigo)
+    if(mode !== 'scale') drawHTML += arrow(b[0], b[1], ML.plotColors.model, 0.2); // b (teal)
+
+    const norma = ML.vnorm(a), normb = ML.vnorm(b);
+    const dot = ML.dot(a,b);
+    const angle = Math.acos(ML.clamp(dot/(norma*normb || 1), -1, 1)) * 180 / Math.PI;
+
+    let readoutText = `||a|| = ${ML.fmt(norma)}\n||b|| = ${ML.fmt(normb)}\na · b = ${ML.fmt(dot)}\nAngle = ${ML.fmt(angle)}°\n`;
+
+    if(mode === 'add') {
+      const sum = ML.vadd(a,b);
+      drawHTML += line(a[0], a[1], sum[0], sum[1], ML.plotColors.model);
+      drawHTML += line(b[0], b[1], sum[0], sum[1], ML.plotColors.data);
+      drawHTML += arrow(sum[0], sum[1], ML.plotColors.gradient, 0.25); // a+b plum
+      readoutText += `a + b = [${ML.fmt(sum[0])}, ${ML.fmt(sum[1])}]`;
+    } else if(mode === 'scale') {
+      const scaled = ML.vscale(c, a);
+      drawHTML += arrow(scaled[0], scaled[1], ML.plotColors.gradient, 0.15, true); 
+      readoutText += `${c} · a = [${ML.fmt(scaled[0])}, ${ML.fmt(scaled[1])}]`;
+    } else if(mode === 'proj') {
+      if(normb > 0) {
+        const proj = ML.vscale(dot/(normb*normb), b);
+        const res = ML.vsub(a, proj);
+        drawHTML += arrow(proj[0], proj[1], ML.plotColors.constraint, 0.25); // proj citron
+        drawHTML += line(a[0], a[1], proj[0], proj[1], ML.plotColors.residual, 0.15); // residual rose
+        readoutText += `Proj_b(a) = [${ML.fmt(proj[0])}, ${ML.fmt(proj[1])}]\nResidual = [${ML.fmt(res[0])}, ${ML.fmt(res[1])}]`;
+      }
+    }
+    draw.innerHTML = drawHTML;
+    readout.innerText = readoutText;
+  });
+
+  [ax,ay,bx,by,cs].forEach(el => el.addEventListener('input', update));
+  update();
+});
+
+/* WIDGET 2: MATRICES */
+ML.lazyInit('w2_area', function() {
+  const area = document.getElementById('w2_area');
+  area.innerHTML = `
+    <p>A matrix is a mathematical workhorse that acts as a <strong>transformation</strong> on space. When we multiply a vector by a matrix, we are applying a mapping that can rotate, scale, shear, or reflect that vector. Think of the columns of a 2×2 matrix as telling you where the standard basis vectors \\([1, 0]\\) and \\([0, 1]\\) land after the transformation.</p>
+    <p>The <strong>determinant</strong> of a matrix tells us how much the area of a shape scales during this transformation. If the determinant is negative, the space has been flipped (reflected). If it's zero, space has been squashed into a lower dimension!</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <div class="presets">
+          <button id="w2_p_id">Identity</button>
+          <button id="w2_p_rot">Rotation (45°)</button>
+          <button id="w2_p_scale">Scale</button>
+          <button id="w2_p_shear">Shear</button>
+          <button id="w2_p_ref">Reflection</button>
+          <button id="w2_p_zero">Squash</button>
+        </div>
+        <div class="matrix-display" style="font-size:1rem; margin-top:1rem;">
+          <table>
+            <tr><td><input type="number" id="w2_a" value="1" step="0.1" style="width:60px"></td><td><input type="number" id="w2_b" value="0" step="0.1" style="width:60px"></td></tr>
+            <tr><td><input type="number" id="w2_c" value="0" step="0.1" style="width:60px"></td><td><input type="number" id="w2_d" value="1" step="0.1" style="width:60px"></td></tr>
+          </table>
+        </div>
+        <button class="btn btn-reset mt-1" id="w2_reset">Reset</button>
+      </div>
+      <div class="widget-plot" style="display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1rem;">
+        <svg id="w2_svg" viewBox="-5 -5 10 10" style="width:100%; max-width:400px; height:auto; overflow:visible; transform: scaleY(-1);">
+          <g id="w2_grid"></g>
+          <g id="w2_draw"></g>
+        </svg>
+      </div>
+    </div>
+    <div class="readout" id="w2_readout"></div>
+    <details class="check">
+      <summary>If a matrix transforms a unit square into a shape with area 0, what can you say about the matrix?</summary>
+      <div class="ans">Its determinant must be 0! The transformation squashed 2D space down into a 1D line (or a single point). Such a matrix is called <em>singular</em> or non-invertible.</div>
+    </details>
+    <div class="misconception">It's easy to just memorize matrix multiplication as "row times column". While computationally correct, it hides the beautiful geometric reality: multiplying by a matrix is an active transformation of space.</div>
+  `;
+
+  const aa = document.getElementById('w2_a'), ab = document.getElementById('w2_b');
+  const ac = document.getElementById('w2_c'), ad = document.getElementById('w2_d');
+  const grid = document.getElementById('w2_grid'), draw = document.getElementById('w2_draw');
+  const readout = document.getElementById('w2_readout');
+
+  const setMat = (a,b,c,d) => { aa.value=a; ab.value=b; ac.value=c; ad.value=d; update(); };
+  document.getElementById('w2_p_id').onclick = ()=>setMat(1,0,0,1);
+  document.getElementById('w2_p_rot').onclick = ()=>setMat(0.7,-0.7,0.7,0.7);
+  document.getElementById('w2_p_scale').onclick = ()=>setMat(2,0,0,0.5);
+  document.getElementById('w2_p_shear').onclick = ()=>setMat(1,1,0,1);
+  document.getElementById('w2_p_ref').onclick = ()=>setMat(-1,0,0,1);
+  document.getElementById('w2_p_zero').onclick = ()=>setMat(1,1,1,1);
+  document.getElementById('w2_reset').onclick = ()=>setMat(1,0,0,1);
+
+  let gridHTML = '';
+  for(let i=-5; i<=5; i+=1) {
+    gridHTML += `<line x1="${i}" y1="-5" x2="${i}" y2="5" stroke="var(--rule)" stroke-width="0.05" />`;
+    gridHTML += `<line x1="-5" y1="${i}" x2="5" y2="${i}" stroke="var(--rule)" stroke-width="0.05" />`;
+  }
+  grid.innerHTML = gridHTML;
+
+  const update = ML.throttledRedraw(() => {
+    const m = [[parseFloat(aa.value), parseFloat(ab.value)], [parseFloat(ac.value), parseFloat(ad.value)]];
+    const det = ML.det2x2(m[0][0], m[0][1], m[1][0], m[1][1]);
+    
+    // Draw transformed grid
+    let drawHTML = '';
+    for(let i=-5; i<=5; i+=1) {
+      const p1 = ML.matvec(m, [i, -5]), p2 = ML.matvec(m, [i, 5]);
+      const p3 = ML.matvec(m, [-5, i]), p4 = ML.matvec(m, [5, i]);
+      drawHTML += `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="var(--teal)" stroke-width="0.03" opacity="0.5"/>`;
+      drawHTML += `<line x1="${p3[0]}" y1="${p3[1]}" x2="${p4[0]}" y2="${p4[1]}" stroke="var(--teal)" stroke-width="0.03" opacity="0.5"/>`;
+    }
+
+    // Unit square
+    const pts = [[0,0], [1,0], [1,1], [0,1]];
+    const tpts = pts.map(p => ML.matvec(m, p));
+    const poly = tpts.map(p => `${p[0]},${p[1]}`).join(' ');
+    drawHTML += `<polygon points="${poly}" fill="var(--indigo)" opacity="0.3" stroke="var(--indigo)" stroke-width="0.1" />`;
+    
+    // Basis vectors
+    const e1 = ML.matvec(m, [1,0]), e2 = ML.matvec(m, [0,1]);
+    drawHTML += `
+      <line x1="0" y1="0" x2="${e1[0]}" y2="${e1[1]}" stroke="var(--indigo)" stroke-width="0.15" />
+      <circle cx="${e1[0]}" cy="${e1[1]}" r="0.15" fill="var(--indigo)" />
+      <line x1="0" y1="0" x2="${e2[0]}" y2="${e2[1]}" stroke="var(--plum)" stroke-width="0.15" />
+      <circle cx="${e2[0]}" cy="${e2[1]}" r="0.15" fill="var(--plum)" />
+    `;
+
+    draw.innerHTML = drawHTML;
+    readout.innerHTML = `Determinant (Area Scale Factor) = <strong>${ML.fmt(det)}</strong>`;
+  });
+
+  [aa,ab,ac,ad].forEach(el => el.addEventListener('input', update));
+  update();
+});
+
+/* WIDGET 3: LINEAR SYSTEMS */
+ML.lazyInit('w3_area', function() {
+  const area = document.getElementById('w3_area');
+  area.innerHTML = `
+    <p>A system of linear equations is the heart of regression. When we write \\(\\mathbf{A}\\mathbf{x} = \\mathbf{b}\\), we are looking for the vector \\(\\mathbf{x}\\) that, when transformed by \\(\\mathbf{A}\\), exactly hits the target vector \\(\\mathbf{b}\\).</p>
+    <p>In 2D, each equation represents a line. The solution \\(\\mathbf{x}\\) is where the two lines cross. But what if the lines are parallel? Then there is no solution (or infinitely many, if they overlap completely). This occurs when the matrix \\(\\mathbf{A}\\) is <em>singular</em>.</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>Line 1: <span class="val" id="w3_eq1">1x + 2y = 4</span></label>
+        <div style="display:flex; gap:0.2rem">
+          <input type="number" id="w3_a11" value="1" step="0.5" style="width:33%">
+          <input type="number" id="w3_a12" value="2" step="0.5" style="width:33%">
+          <input type="number" id="w3_b1" value="4" step="0.5" style="width:33%">
+        </div>
+        <label>Line 2: <span class="val" id="w3_eq2">3x - 1y = 2</span></label>
+        <div style="display:flex; gap:0.2rem">
+          <input type="number" id="w3_a21" value="3" step="0.5" style="width:33%">
+          <input type="number" id="w3_a22" value="-1" step="0.5" style="width:33%">
+          <input type="number" id="w3_b2" value="2" step="0.5" style="width:33%">
+        </div>
+        <button class="btn btn-primary mt-1" id="w3_make_singular">Make Singular (Parallel)</button>
+        <button class="btn btn-reset mt-1" id="w3_reset">Reset</button>
+      </div>
+      <div class="widget-plot" style="display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1rem;">
+        <svg id="w3_svg" viewBox="-10 -10 20 20" style="width:100%; max-width:400px; height:auto; overflow:visible; transform: scaleY(-1);">
+          <g id="w3_grid"></g>
+          <g id="w3_draw"></g>
+        </svg>
+      </div>
+    </div>
+    <div class="readout" id="w3_readout"></div>
+    <div class="challenge">
+      <div class="ch-title">Challenge: Infinite Solutions</div>
+      Can you adjust the inputs so that the system has infinitely many solutions? What must be true about the two equations?
+    </div>
+  `;
+
+  const i_a11=document.getElementById('w3_a11'), i_a12=document.getElementById('w3_a12'), i_b1=document.getElementById('w3_b1');
+  const i_a21=document.getElementById('w3_a21'), i_a22=document.getElementById('w3_a22'), i_b2=document.getElementById('w3_b2');
+  const grid=document.getElementById('w3_grid'), draw=document.getElementById('w3_draw');
+  const readout=document.getElementById('w3_readout');
+
+  document.getElementById('w3_reset').onclick=()=>{
+    i_a11.value=1; i_a12.value=2; i_b1.value=4;
+    i_a21.value=3; i_a22.value=-1; i_b2.value=2;
+    update();
+  };
+  document.getElementById('w3_make_singular').onclick=()=>{
+    i_a21.value = parseFloat(i_a11.value) * 2;
+    i_a22.value = parseFloat(i_a12.value) * 2;
+    // ensure b2 isn't exactly matching so they are parallel not coincident
+    i_b2.value = parseFloat(i_b1.value) * 2 + 5; 
+    update();
+  };
+
+  let gridHTML = `
+    <line x1="-10" y1="0" x2="10" y2="0" stroke="var(--rule)" stroke-width="0.1" />
+    <line x1="0" y1="-10" x2="0" y2="10" stroke="var(--rule)" stroke-width="0.1" />
+  `;
+  for(let i=-10; i<=10; i+=2) {
+    if(i===0)continue;
+    gridHTML+=`<line x1="${i}" y1="-10" x2="${i}" y2="10" stroke="var(--rule)" stroke-width="0.05" />`;
+    gridHTML+=`<line x1="-10" y1="${i}" x2="10" y2="${i}" stroke="var(--rule)" stroke-width="0.05" />`;
+  }
+  grid.innerHTML=gridHTML;
+
+  const update = ML.throttledRedraw(() => {
+    const a11=parseFloat(i_a11.value), a12=parseFloat(i_a12.value), b1=parseFloat(i_b1.value);
+    const a21=parseFloat(i_a21.value), a22=parseFloat(i_a22.value), b2=parseFloat(i_b2.value);
+    document.getElementById('w3_eq1').innerText = `${a11}x + ${a12}y = ${b1}`;
+    document.getElementById('w3_eq2').innerText = `${a21}x + ${a22}y = ${b2}`;
+
+    let drawHTML='';
+    const drawLine = (a,b,c,col) => {
+      // ax+by=c
+      let pts=[];
+      if(Math.abs(b)>0.001){
+        const y_at_m10 = (c - a*-10)/b; if(y_at_m10>=-20 && y_at_m10<=20) pts.push([-10, y_at_m10]);
+        const y_at_p10 = (c - a*10)/b; if(y_at_p10>=-20 && y_at_p10<=20) pts.push([10, y_at_p10]);
+      }
+      if(Math.abs(a)>0.001){
+        const x_at_m10 = (c - b*-10)/a; if(x_at_m10>=-20 && x_at_m10<=20) pts.push([x_at_m10, -10]);
+        const x_at_p10 = (c - b*10)/a; if(x_at_p10>=-20 && x_at_p10<=20) pts.push([x_at_p10, 10]);
+      }
+      if(pts.length>=2) {
+        drawHTML+=`<line x1="${pts[0][0]}" y1="${pts[0][1]}" x2="${pts[1][0]}" y2="${pts[1][1]}" stroke="${col}" stroke-width="0.2"/>`;
+      }
+    };
+    drawLine(a11, a12, b1, ML.plotColors.data);
+    drawLine(a21, a22, b2, ML.plotColors.model);
+
+    const det = ML.det2x2(a11, a12, a21, a22);
+    if(Math.abs(det)<1e-5) {
+      // singular
+      const diff = a11*b2 - a21*b1;
+      if(Math.abs(diff)<1e-5 && Math.abs(a12*b2 - a22*b1)<1e-5) {
+        readout.innerHTML = `<span style="color:var(--teal)">Rank = 1. Lines are coincident. Infinitely many solutions!</span>`;
+      } else {
+        readout.innerHTML = `<span style="color:var(--rose)">Rank = 1. Lines are parallel. No solution.</span>`;
+      }
+    } else {
+      const sol = ML.solve([[a11,a12],[a21,a22]], [b1,b2]);
+      if(sol) {
+        drawHTML+=`<circle cx="${sol[0]}" cy="${sol[1]}" r="0.4" fill="var(--plum)"/>`;
+        readout.innerHTML = `Rank = 2. Unique solution: <strong>x = ${ML.fmt(sol[0])}, y = ${ML.fmt(sol[1])}</strong>`;
+      }
+    }
+    draw.innerHTML = drawHTML;
+  });
+  [i_a11,i_a12,i_b1,i_a21,i_a22,i_b2].forEach(el=>el.addEventListener('input', update));
+  update();
+});
+
+/* WIDGET 4: COORDINATE SYSTEMS */
+ML.lazyInit('w4_area', function() {
+  const area = document.getElementById('w4_area');
+  area.innerHTML = `
+    <p>A coordinate system lets us map data points to a spatial framework. Each feature of a data point corresponds to an axis. If we have two features (like square footage and number of bedrooms), we can plot each house as a point in a 2D coordinate system.</p>
+    <p>What if we want to model house price as well? Then we need a 3rd dimension. Suddenly our points live in 3D space, and our regression task will be to find a 2D plane that slices neatly through them!</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>View Mode</label>
+        <div class="presets">
+          <button id="w4_btn_2d" class="active">2D (Features Only)</button>
+          <button id="w4_btn_3d">3D (Features + Price)</button>
+        </div>
+        <p class="text-sm text-muted mt-2">Interact with the plot! You can drag to rotate the 3D view.</p>
+      </div>
+      <div class="widget-plot" id="w4_plot"></div>
+    </div>
+  `;
+
+  const plotDiv = document.getElementById('w4_plot');
+  const data = ML.housePriceData(50, 42); 
+  let is3D = false;
+
+  const btn2d = document.getElementById('w4_btn_2d');
+  const btn3d = document.getElementById('w4_btn_3d');
+
+  function draw() {
+    if(!is3D) {
+      const trace = {
+        x: data.sqft, y: data.beds, mode: 'markers', type: 'scatter',
+        marker: {size: 8, color: ML.plotColors.data, opacity: 0.8}
+      };
+      Plotly.react(plotDiv, [trace], ML.plotLayout({
+        title: '2D: Features (Sqft vs Beds)',
+        xaxis: {title: 'Sqft'}, yaxis: {title: 'Beds'}
+      }), ML.plotConfig);
+    } else {
+      const trace = {
+        x: data.sqft, y: data.beds, z: data.price,
+        mode: 'markers', type: 'scatter3d',
+        marker: {size: 5, color: ML.plotColors.gradient, opacity: 0.8}
+      };
+      Plotly.react(plotDiv, [trace], {
+        margin: {l:0, r:0, t:30, b:0},
+        scene: {
+          xaxis: {title: 'Sqft'}, yaxis: {title: 'Beds'}, zaxis: {title: 'Price ($k)'}
+        }
+      }, ML.plotConfig);
+    }
+  }
+
+  btn2d.onclick = () => { is3D=false; btn2d.classList.add('active'); btn3d.classList.remove('active'); draw(); };
+  btn3d.onclick = () => { is3D=true; btn3d.classList.add('active'); btn2d.classList.remove('active'); draw(); };
+  draw();
+});
+
+/* WIDGET 5: DERIVATIVES */
+ML.lazyInit('w5_area', function() {
+  const area = document.getElementById('w5_area');
+  area.innerHTML = `
+    <p>The derivative measures the <strong>instantaneous rate of change</strong> of a function. If you are standing on a hill, the derivative tells you exactly how steep the slope is beneath your feet.</p>
+    <p>We calculate this by taking two points on the curve (a secant line) and bringing them infinitely close together until they form a tangent line.</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>Function f(x)
+          <select id="w5_fn">
+            <option value="x2">f(x) = x²</option>
+            <option value="x3">f(x) = x³ / 3</option>
+            <option value="sin">f(x) = sin(x)</option>
+          </select>
+        </label>
+        <label>x value: <span class="val" id="w5_x_val">1</span>
+          <input type="range" id="w5_x" min="-3" max="3" step="0.1" value="1">
+        </label>
+        <label>Step h (secant &rarr; tangent): <span class="val" id="w5_h_val">2.0</span>
+          <input type="range" id="w5_h" min="0.001" max="2" step="0.01" value="2">
+        </label>
+      </div>
+      <div class="widget-plot" id="w5_plot"></div>
+    </div>
+    <div class="readout" id="w5_readout"></div>
+  `;
+
+  const sel = document.getElementById('w5_fn'), ix = document.getElementById('w5_x'), ih = document.getElementById('w5_h');
+  const px = document.getElementById('w5_x_val'), ph = document.getElementById('w5_h_val');
+  const readout = document.getElementById('w5_readout');
+  const plotDiv = document.getElementById('w5_plot');
+
+  const funcs = {
+    x2: { fn: x=>x*x, name: 'x²' },
+    x3: { fn: x=>x*x*x/3, name: 'x³/3' },
+    sin: { fn: Math.sin, name: 'sin(x)' }
+  };
+
+  const update = ML.throttledRedraw(() => {
+    const x = parseFloat(ix.value);
+    const h = parseFloat(ih.value);
+    const f = funcs[sel.value].fn;
+    px.innerText = x; ph.innerText = h.toFixed(3);
+
+    const x_vals = [], y_vals = [];
+    for(let i=-4; i<=4; i+=0.1){ x_vals.push(i); y_vals.push(f(i)); }
+
+    const y = f(x), yh = f(x+h);
+    const slope = (yh - y)/h;
+
+    const t_curve = {x: x_vals, y: y_vals, type:'scatter', mode:'lines', line:{color:ML.plotColors.data}, name:'f(x)'};
+    const t_pts = {x: [x, x+h], y: [y, yh], type:'scatter', mode:'markers', marker:{color:ML.plotColors.plum, size:8}, name:'Points'};
+    
+    // secant line extending past points
+    const s_line = {x: [x-2, x+h+2], y: [y - 2*slope, yh + 2*slope], type:'scatter', mode:'lines', line:{color:ML.plotColors.model, dash:'dash'}, name:'Secant'};
+
+    Plotly.react(plotDiv, [t_curve, s_line, t_pts], ML.plotLayout({
+      showlegend: false, xaxis: {range: [-4,4]}, yaxis: {range: [-4,4]}
+    }), ML.plotConfig);
+
+    readout.innerHTML = `Slope = \\(\\frac{f(x+h) - f(x)}{h}\\) = \\(\\frac{${ML.fmt(yh)} - ${ML.fmt(y)}}{${h.toFixed(3)}}\\) = <strong>${ML.fmt(slope, 4)}</strong>`;
+    if(window.renderMathInElement) renderMathInElement(readout);
+  });
+
+  [sel, ix, ih].forEach(el=>el.addEventListener('input', update));
+  update();
+});
+
+/* WIDGET 6: GRADIENTS */
+ML.lazyInit('w6_area', function() {
+  const area = document.getElementById('w6_area');
+  area.innerHTML = `
+    <p>In multiple dimensions, the derivative becomes a vector called the <strong>gradient</strong>. The gradient always points in the direction of steepest <em>ascent</em> (uphill). By taking small steps in the <em>opposite</em> direction (the negative gradient), we can roll downhill to find the minimum of a function.</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>Surface</label>
+        <div class="presets">
+          <button id="w6_f_bowl" class="active">Bowl (x² + y²)</button>
+          <button id="w6_f_saddle">Saddle (x² - y²)</button>
+        </div>
+        <p class="text-sm mt-2"><strong>Click on the contour plot!</strong> It will show the gradient vector at that point.</p>
+        <button class="btn btn-primary mt-1" id="w6_step">Walk Downhill (Gradient Descent)</button>
+        <button class="btn btn-reset mt-1" id="w6_reset">Reset Point</button>
+      </div>
+      <div class="widget-plot" id="w6_plot" style="height:400px"></div>
+    </div>
+    <div class="readout" id="w6_readout"></div>
+  `;
+
+  const plotDiv = document.getElementById('w6_plot');
+  let currentFn = 'bowl';
+  let pX = 2, pY = 2;
+
+  const fns = {
+    bowl: { f: (x,y)=>x*x + y*y, gx: (x,y)=>2*x, gy: (x,y)=>2*y },
+    saddle: { f: (x,y)=>x*x - y*y, gx: (x,y)=>2*x, gy: (x,y)=>-2*y }
+  };
+
+  document.getElementById('w6_f_bowl').onclick = (e) => { currentFn='bowl'; e.target.classList.add('active'); document.getElementById('w6_f_saddle').classList.remove('active'); draw(); };
+  document.getElementById('w6_f_saddle').onclick = (e) => { currentFn='saddle'; e.target.classList.add('active'); document.getElementById('w6_f_bowl').classList.remove('active'); draw(); };
+  document.getElementById('w6_reset').onclick = () => { pX=2; pY=2; draw(); };
+  document.getElementById('w6_step').onclick = () => {
+    const fn = fns[currentFn];
+    const lr = 0.2;
+    pX = pX - lr * fn.gx(pX, pY);
+    pY = pY - lr * fn.gy(pX, pY);
+    draw();
+  };
+
+  plotDiv.on('plotly_click', data => {
+    pX = data.points[0].x;
+    pY = data.points[0].y;
+    draw();
+  });
+
+  function draw() {
+    const fn = fns[currentFn];
+    const xv = [], yv = [], zv = [];
+    for(let i=-3; i<=3; i+=0.2){
+      xv.push(i); yv.push(i);
+      const row=[];
+      for(let j=-3; j<=3; j+=0.2) row.push(fn.f(j,i));
+      zv.push(row);
+    }
+
+    const t_contour = {
+      z: zv, x: xv, y: yv, type: 'contour', colorscale: 'Viridis', showscale: false
+    };
+
+    const gx = fn.gx(pX, pY), gy = fn.gy(pX, pY);
+    const gradLen = Math.hypot(gx,gy);
+    const t_pt = { x: [pX], y: [pY], mode: 'markers', marker: {size: 10, color: 'red'} };
+
+    // We draw arrows using annotations
+    const annotations = [];
+    if(gradLen > 0.01) {
+      // gradient arrow (uphill)
+      annotations.push({
+        x: pX + gx*0.2, y: pY + gy*0.2,
+        ax: pX, ay: pY,
+        xref: 'x', yref: 'y', axref: 'x', ayref: 'y',
+        showarrow: true, arrowhead: 2, arrowcolor: ML.plotColors.plum, arrowsize: 1.5
+      });
+      // negative gradient (downhill)
+      annotations.push({
+        x: pX - gx*0.2, y: pY - gy*0.2,
+        ax: pX, ay: pY,
+        xref: 'x', yref: 'y', axref: 'x', ayref: 'y',
+        showarrow: true, arrowhead: 2, arrowcolor: ML.plotColors.model, arrowsize: 1.5, arrowdash: 'dash'
+      });
+    }
+
+    Plotly.react(plotDiv, [t_contour, t_pt], ML.plotLayout({
+      annotations, xaxis: {range:[-3,3]}, yaxis: {range:[-3,3]}
+    }), ML.plotConfig);
+
+    document.getElementById('w6_readout').innerHTML = `Point: (${ML.fmt(pX)}, ${ML.fmt(pY)})<br>Gradient: [\\(\\frac{\\partial f}{\\partial x}\\), \\(\\frac{\\partial f}{\\partial y}\\)] = [${ML.fmt(gx)}, ${ML.fmt(gy)}]`;
+    if(window.renderMathInElement) renderMathInElement(document.getElementById('w6_readout'));
+  }
+  
+  // init delay to ensure plotly is ready
+  setTimeout(draw, 100);
+});
+
+/* WIDGET 7: MAXIMA MINIMA */
+ML.lazyInit('w7_area', function() {
+  const area = document.getElementById('w7_area');
+  area.innerHTML = `
+    <p>When the gradient is exactly zero, we are at a <strong>critical point</strong>. But is it a minimum (a valley), a maximum (a peak), or a saddle point (a mountain pass)? To find out, we look at the <strong>Hessian matrix</strong>, which contains the second derivatives (the curvature).</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>Surface Topology</label>
+        <div class="presets">
+          <button id="w7_bowl" class="active">Bowl (Min)</button>
+          <button id="w7_hill">Hill (Max)</button>
+          <button id="w7_saddle">Saddle (Mixed)</button>
+          <button id="w7_ridge">Ridge (Degenerate)</button>
+        </div>
+        <button class="btn btn-reset mt-1" id="w7_reset">Reset</button>
+      </div>
+      <div class="widget-plot" id="w7_plot" style="height:400px"></div>
+    </div>
+    <div class="readout" id="w7_readout"></div>
+  `;
+
+  const plotDiv = document.getElementById('w7_plot');
+  const fns = {
+    bowl: { f: (x,y)=>x*x + y*y, H: [[2,0],[0,2]], name: 'Bowl' },
+    hill: { f: (x,y)=>-x*x - y*y, H: [[-2,0],[0,-2]], name: 'Hill' },
+    saddle: { f: (x,y)=>x*x - y*y, H: [[2,0],[0,-2]], name: 'Saddle' },
+    ridge: { f: (x,y)=>x*x, H: [[2,0],[0,0]], name: 'Ridge' }
+  };
+  let cur = 'bowl';
+
+  ['bowl','hill','saddle','ridge'].forEach(k => {
+    document.getElementById('w7_'+k).onclick = (e) => {
+      cur = k; 
+      ['bowl','hill','saddle','ridge'].forEach(id => document.getElementById('w7_'+id).classList.remove('active'));
+      e.target.classList.add('active');
+      draw();
+    };
+  });
+  
+  document.getElementById('w7_reset').onclick = () => { cur = 'bowl'; draw(); };
+
+  function draw() {
+    const fn = fns[cur];
+    const xv = [], yv = [], zv = [];
+    for(let i=-2; i<=2; i+=0.2){
+      xv.push(i); yv.push(i);
+      const row=[];
+      for(let j=-2; j<=2; j+=0.2) row.push(fn.f(j,i));
+      zv.push(row);
+    }
+    const trace = {z: zv, x: xv, y: yv, type: 'surface', colorscale: 'Viridis', showscale: false};
+    Plotly.react(plotDiv, [trace], {margin:{l:0,r:0,t:0,b:0}}, ML.plotConfig);
+    
+    const eig = ML.eigen2x2Sym(fn.H[0][0], fn.H[0][1], fn.H[1][1]);
+    const e1 = ML.fmt(eig.values[0]), e2 = ML.fmt(eig.values[1]);
+    
+    let type = '';
+    if(eig.values[0]>0 && eig.values[1]>0) type = 'Local Minimum (All eigenvalues > 0)';
+    else if(eig.values[0]<0 && eig.values[1]<0) type = 'Local Maximum (All eigenvalues < 0)';
+    else if(eig.values[0]*eig.values[1] < 0) type = 'Saddle Point (Mixed eigenvalues)';
+    else type = 'Degenerate (Zero eigenvalue)';
+
+    document.getElementById('w7_readout').innerHTML = `
+      Hessian Matrix:<br>
+      [ ${fn.H[0][0]} , ${fn.H[0][1]} ]<br>
+      [ ${fn.H[1][0]} , ${fn.H[1][1]} ]<br>
+      Eigenvalues: ${e1}, ${e2}<br>
+      <strong style="color:var(--teal)">Classification: ${type}</strong>
+    `;
+  }
+  setTimeout(draw, 100);
+});
+
+
+// === MODULE 2 WIDGETS ===
+(function() {
+  // =========================================================================
+  // WIDGET 8: AI Timeline
+  // =========================================================================
+  ML.lazyInit('w8_area', function() {
+    const area = document.getElementById('w8_area');
+    
+    // HTML Content
+    area.innerHTML = `
+      <p>Artificial Intelligence is not a new idea. Its roots trace back to the mid-20th century, though it has experienced several boom-and-bust cycles (known as "AI winters") driven by shifts in funding, hype, and compute power.</p>
+      <p>In this interactive timeline, explore the key milestones that shaped the field, from early symbolic reasoning to modern deep learning and large language models.</p>
+      
+      <div class="widget-full" style="background:var(--panel); border:1px solid var(--rule); border-radius:var(--radius); padding:1rem; overflow:hidden;">
+        <div class="presets" id="w8_filters" style="margin-bottom: 1rem;">
+          <button class="active" data-filter="all">All</button>
+          <button data-filter="symbolic">Symbolic AI</button>
+          <button data-filter="neural">Neural Networks</button>
+          <button data-filter="games">Games</button>
+          <button data-filter="nlp">NLP / LLMs</button>
+        </div>
+        
+        <div id="w8_timeline" style="position:relative; width:100%; overflow-x:auto; padding-bottom: 1rem; min-height: 180px;">
+          <div style="position:absolute; top:40px; left:20px; right:20px; height:4px; background:var(--rule); border-radius:2px; min-width: 800px;"></div>
+          <div id="w8_events" style="position:relative; height:100%; min-width: 800px;"></div>
+        </div>
+        
+        <div id="w8_info" style="min-height: 80px; padding: 1rem; background: #fff; border: 1px solid var(--rule); border-radius: var(--radius); margin-top: 1rem;">
+          <h4 id="w8_title" style="color:var(--indigo); margin-bottom: 0.5rem;">Select an event above</h4>
+          <p id="w8_desc" style="font-size: 0.9rem; color:var(--ink-soft); margin:0;">Click on a timeline point to see details here.</p>
+        </div>
+      </div>
+    `;
+    
+    const events = [
+      { year: 1950, title: "Turing Test", cat: "symbolic", desc: "Alan Turing proposes the 'Imitation Game' as a test of machine intelligence, laying the philosophical groundwork for AI." },
+      { year: 1956, title: "Dartmouth Workshop", cat: "symbolic", desc: "The term 'Artificial Intelligence' is coined. Researchers convene to discuss simulating learning and other aspects of human intelligence." },
+      { year: 1958, title: "Perceptron", cat: "neural", desc: "Frank Rosenblatt invents the Perceptron, an early artificial neural network, sparking initial excitement before its limitations were proven." },
+      { year: 1974, title: "First AI Winter", cat: "symbolic", desc: "Due to unmet expectations and limited compute power, government funding for AI research is severely cut." },
+      { year: 1980, title: "Expert Systems", cat: "symbolic", desc: "AI bounces back with 'expert systems'—programs that use if-then rules to simulate human expertise in specific domains." },
+      { year: 1987, title: "Second AI Winter", cat: "symbolic", desc: "The expert system market collapses as they prove brittle and hard to maintain, leading to another major funding dry spell." },
+      { year: 1997, title: "Deep Blue", cat: "games", desc: "IBM's Deep Blue defeats world chess champion Garry Kasparov, a triumph of brute-force search and symbolic AI." },
+      { year: 2012, title: "AlexNet", cat: "neural", desc: "A deep convolutional neural network crushes the ImageNet competition, kicking off the modern Deep Learning revolution." },
+      { year: 2014, title: "GANs", cat: "neural", desc: "Generative Adversarial Networks are introduced, allowing AI to generate highly realistic synthetic images." },
+      { year: 2016, title: "AlphaGo", cat: "games", desc: "DeepMind's AlphaGo defeats Lee Sedol at Go, a game previously thought too complex for AI, using reinforcement learning." },
+      { year: 2017, title: "Transformers", cat: "nlp", desc: "Google introduces the Transformer architecture ('Attention is All You Need'), which becomes the foundation of modern NLP." },
+      { year: 2020, title: "GPT & LLMs", cat: "nlp", desc: "OpenAI releases GPT-3, demonstrating that massive language models can perform diverse tasks with zero-shot prompting." }
+    ];
+    
+    const eventsContainer = document.getElementById('w8_events');
+    const filterBtns = document.querySelectorAll('#w8_filters button');
+    const titleEl = document.getElementById('w8_title');
+    const descEl = document.getElementById('w8_desc');
+    
+    let activeFilter = 'all';
+    let activeEvent = null;
+    
+    function renderTimeline() {
+      eventsContainer.innerHTML = '';
+      const minYear = 1945;
+      const maxYear = 2025;
+      const range = maxYear - minYear;
+      
+      events.forEach((ev, i) => {
+        const isVisible = activeFilter === 'all' || ev.cat === activeFilter;
+        if (!isVisible) return;
+        
+        const pos = ((ev.year - minYear) / range) * 100;
+        
+        const dot = document.createElement('div');
+        dot.style.position = 'absolute';
+        dot.style.left = `calc(${pos}% - 10px)`;
+        dot.style.top = '32px';
+        dot.style.width = '20px';
+        dot.style.height = '20px';
+        dot.style.borderRadius = '50%';
+        dot.style.background = activeEvent === i ? 'var(--teal)' : 'var(--indigo)';
+        dot.style.border = '3px solid #fff';
+        dot.style.cursor = 'pointer';
+        dot.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        dot.style.transition = 'all 0.2s';
+        dot.title = ev.year + " - " + ev.title;
+        
+        dot.addEventListener('mouseenter', () => {
+          if (activeEvent !== i) dot.style.transform = 'scale(1.2)';
+        });
+        dot.addEventListener('mouseleave', () => {
+          if (activeEvent !== i) dot.style.transform = 'scale(1)';
+        });
+        
+        dot.addEventListener('click', () => {
+          activeEvent = i;
+          titleEl.textContent = ev.year + ": " + ev.title;
+          descEl.textContent = ev.desc;
+          renderTimeline();
+        });
+        
+        const label = document.createElement('div');
+        label.style.position = 'absolute';
+        label.style.left = `${pos}%`;
+        label.style.transform = 'translateX(-50%)';
+        label.style.top = i % 2 === 0 ? '10px' : '58px';
+        label.style.fontSize = '0.75rem';
+        label.style.fontWeight = activeEvent === i ? 'bold' : 'normal';
+        label.style.color = activeEvent === i ? 'var(--teal)' : 'var(--ink)';
+        label.style.whiteSpace = 'nowrap';
+        label.style.pointerEvents = 'none';
+        label.textContent = ev.title;
+        
+        eventsContainer.appendChild(dot);
+        eventsContainer.appendChild(label);
+      });
+    }
+    
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        activeFilter = e.target.getAttribute('data-filter');
+        activeEvent = null;
+        titleEl.textContent = 'Select an event above';
+        descEl.textContent = 'Click on a timeline point to see details here.';
+        renderTimeline();
+      });
+    });
+    
+    renderTimeline();
+  });
+
+  // =========================================================================
+  // WIDGET 9: AI > ML > DL
+  // =========================================================================
+  ML.lazyInit('w9_area', function() {
+    const area = document.getElementById('w9_area');
+    
+    area.innerHTML = `
+      <p>People often use Artificial Intelligence, Machine Learning, and Deep Learning interchangeably, but they are actually concentric fields. Each inner circle is a specialized subset of the larger circle.</p>
+      
+      <div class="side-by-side" style="align-items: center; background:var(--panel); border:1px solid var(--rule); border-radius:var(--radius); padding:1.5rem;">
+        <div style="position:relative; width:100%; aspect-ratio:1/1;">
+          <svg viewBox="0 0 100 100" style="width:100%; height:100%; cursor:pointer;">
+            <circle id="w9_c_ai" cx="50" cy="50" r="45" fill="rgba(59,82,139,0.15)" stroke="var(--indigo)" stroke-width="2" class="w9-layer" data-layer="ai" style="transition:all 0.3s;" />
+            <text x="50" y="15" text-anchor="middle" font-size="6" font-family="var(--font-h)" font-weight="bold" fill="var(--indigo)" pointer-events="none">Artificial Intelligence (AI)</text>
+            
+            <circle id="w9_c_ml" cx="50" cy="58" r="33" fill="rgba(31,138,133,0.15)" stroke="var(--teal)" stroke-width="2" class="w9-layer" data-layer="ml" style="transition:all 0.3s;" />
+            <text x="50" y="32" text-anchor="middle" font-size="5" font-family="var(--font-h)" font-weight="bold" fill="var(--teal)" pointer-events="none">Machine Learning (ML)</text>
+            
+            <circle id="w9_c_dl" cx="50" cy="65" r="21" fill="rgba(178,58,107,0.15)" stroke="var(--rose)" stroke-width="2" class="w9-layer" data-layer="dl" style="transition:all 0.3s;" />
+            <text x="50" y="55" text-anchor="middle" font-size="4.5" font-family="var(--font-h)" font-weight="bold" fill="var(--rose)" pointer-events="none">Deep</text>
+            <text x="50" y="61" text-anchor="middle" font-size="4.5" font-family="var(--font-h)" font-weight="bold" fill="var(--rose)" pointer-events="none">Learning</text>
+            <text x="50" y="67" text-anchor="middle" font-size="4.5" font-family="var(--font-h)" font-weight="bold" fill="var(--rose)" pointer-events="none">(DL)</text>
+          </svg>
+        </div>
+        
+        <div id="w9_info" style="background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1rem; height:100%;">
+          <h4 id="w9_title" style="color:var(--ink); margin-bottom:0.5rem; font-size:1.1rem;">Click a layer to explore</h4>
+          <p id="w9_def" style="font-size:0.9rem; color:var(--ink-soft); margin-bottom:1rem;"></p>
+          <ul id="w9_examples" style="font-size:0.85rem; padding-left:1.2rem; color:var(--ink-soft);"></ul>
+        </div>
+      </div>
+      
+      <div class="misconception">
+        It is a common mistake to assume that everything "AI" involves neural networks. An old-school chess bot running a minimax algorithm is AI, but it is not Machine Learning, because it doesn't learn from data—it just follows a hard-coded search strategy.
+      </div>
+    `;
+    
+    const layers = {
+      ai: {
+        title: "Artificial Intelligence (AI)",
+        color: "var(--indigo)",
+        def: "Any technique that enables computers to mimic human intelligence, using logic, if-then rules, decision trees, or machine learning.",
+        examples: ["Rule-based Expert Systems", "A* Pathfinding in video games", "Symbolic math solvers"]
+      },
+      ml: {
+        title: "Machine Learning (ML)",
+        color: "var(--teal)",
+        def: "A subset of AI that includes statistical techniques allowing machines to improve at tasks with experience. The machine learns rules from data rather than being explicitly programmed.",
+        examples: ["Linear / Logistic Regression", "Random Forests & Decision Trees", "Support Vector Machines (SVMs)"]
+      },
+      dl: {
+        title: "Deep Learning (DL)",
+        color: "var(--rose)",
+        def: "A subset of ML composed of algorithms that permit software to train itself to perform tasks, by exposing multi-layered artificial neural networks to vast amounts of data.",
+        examples: ["Convolutional Neural Networks (CNNs)", "Transformers (GPT, BERT)", "Generative Adversarial Networks (GANs)"]
+      }
+    };
+    
+    const circles = document.querySelectorAll('.w9-layer');
+    const titleEl = document.getElementById('w9_title');
+    const defEl = document.getElementById('w9_def');
+    const exEl = document.getElementById('w9_examples');
+    
+    circles.forEach(circle => {
+      circle.addEventListener('mouseenter', (e) => {
+        e.target.style.fillOpacity = '0.3';
+      });
+      circle.addEventListener('mouseleave', (e) => {
+        if (!e.target.classList.contains('active-layer')) {
+          e.target.style.fillOpacity = '0.15';
+        }
+      });
+      circle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        circles.forEach(c => {
+          c.classList.remove('active-layer');
+          c.style.fillOpacity = '0.15';
+        });
+        e.target.classList.add('active-layer');
+        e.target.style.fillOpacity = '0.4';
+        
+        const layerKey = e.target.getAttribute('data-layer');
+        const data = layers[layerKey];
+        titleEl.textContent = data.title;
+        titleEl.style.color = data.color;
+        defEl.textContent = data.def;
+        exEl.innerHTML = data.examples.map(ex => `<li>${ex}</li>`).join('');
+      });
+    });
+  });
+
+  // =========================================================================
+  // WIDGET 10: Rules vs Learning
+  // =========================================================================
+  ML.lazyInit('w10_area', function() {
+    const area = document.getElementById('w10_area');
+    
+    area.innerHTML = `
+      <p>Before Machine Learning, programmers wrote <strong>rules</strong>. For example, "if a customer spends > $50, they are VIP." But what happens when the boundary isn't a simple straight line on one variable?</p>
+      <p>Below is a dataset of patients. We want to predict if they have a disease (orange) or not (blue) based on two test scores. Try to write a manual rule using just Test 1.</p>
+      
+      <div class="widget-grid">
+        <div class="widget-controls">
+          <label>Manual Rule: Test 1 > <span class="val" id="w10_val">5.0</span>
+            <input type="range" id="w10_thresh" min="0" max="10" step="0.1" value="5.0">
+          </label>
+          <div class="readout">Manual Acc: <b id="w10_acc_man">--</b>%</div>
+          <button class="btn btn-primary mt-2" id="w10_btn_learn">Let the Model Learn!</button>
+          <div class="readout">Model Acc: <b id="w10_acc_mod">--</b>%</div>
+          <button class="btn btn-reset mt-2" id="w10_btn_reset">Reset</button>
+        </div>
+        <div class="widget-plot" id="w10_plot"></div>
+      </div>
+      
+      <details class="check">
+        <summary>Why did the model do better?</summary>
+        <div class="ans">Your manual rule was limited to one dimension (a vertical slice on Test 1). The data actually separates along an oblique line (depending on both Test 1 and Test 2). A Machine Learning algorithm (like Logistic Regression) easily discovers and combines multiple variables to find the optimal boundary.</div>
+      </details>
+    `;
+    
+    // Generate data
+    const rng = new ML.SeededRNG(123);
+    const N = 100;
+    const data = [];
+    for(let i=0; i<N; i++){
+      const x1 = rng.next() * 10;
+      const x2 = rng.next() * 10;
+      // Oblique boundary with some noise
+      const score = x1 + 1.5 * x2 - 12 + rng.normal(0, 1.5);
+      const cls = score > 0 ? 1 : 0;
+      data.push({x1, x2, cls});
+    }
+    
+    const x1_0 = data.filter(d=>d.cls===0).map(d=>d.x1);
+    const x2_0 = data.filter(d=>d.cls===0).map(d=>d.x2);
+    const x1_1 = data.filter(d=>d.cls===1).map(d=>d.x1);
+    const x2_1 = data.filter(d=>d.cls===1).map(d=>d.x2);
+    
+    let threshold = 5.0;
+    let showModel = false;
+    
+    const plotEl = document.getElementById('w10_plot');
+    const threshSlider = document.getElementById('w10_thresh');
+    const valEl = document.getElementById('w10_val');
+    const accManEl = document.getElementById('w10_acc_man');
+    const accModEl = document.getElementById('w10_acc_mod');
+    const btnLearn = document.getElementById('w10_btn_learn');
+    const btnReset = document.getElementById('w10_btn_reset');
+    
+    function calcManualAcc() {
+      let correct = 0;
+      data.forEach(d => {
+        const pred = d.x1 > threshold ? 1 : 0;
+        if(pred === d.cls) correct++;
+      });
+      return ((correct / N) * 100).toFixed(1);
+    }
+    
+    function draw() {
+      const traces = [
+        {
+          x: x1_0, y: x2_0, mode: 'markers', name: 'Class 0 (Blue)',
+          marker: { color: ML.plotColors.data, size: 8 }
+        },
+        {
+          x: x1_1, y: x2_1, mode: 'markers', name: 'Class 1 (Orange)',
+          marker: { color: ML.plotColors.constraint, size: 8 }
+        }
+      ];
+      
+      const shapes = [];
+      
+      // Manual Rule boundary (vertical line)
+      shapes.push({
+        type: 'line', x0: threshold, x1: threshold, y0: 0, y1: 10,
+        line: { color: ML.plotColors.residual, width: 2, dash: 'dash' }
+      });
+      
+      // If model is shown, draw the model boundary
+      // True boundary is approx x1 + 1.5*x2 = 12 => x2 = (12 - x1)/1.5
+      if (showModel) {
+        shapes.push({
+          type: 'line', x0: 0, x1: 10, y0: 12/1.5, y1: (12-10)/1.5,
+          line: { color: ML.plotColors.model, width: 3 }
+        });
+        
+        // Let's hardcode model accuracy to something high like 92% to reflect a good fit
+        let modelCorrect = 0;
+        data.forEach(d => {
+          const score = d.x1 + 1.5 * d.x2 - 12;
+          const pred = score > 0 ? 1 : 0;
+          if(pred === d.cls) modelCorrect++;
+        });
+        accModEl.textContent = ((modelCorrect / N) * 100).toFixed(1);
+      } else {
+        accModEl.textContent = '--';
+      }
+      
+      valEl.textContent = threshold.toFixed(1);
+      accManEl.textContent = calcManualAcc();
+      
+      const layout = ML.plotLayout({
+        xaxis: { title: 'Test 1 Score', range: [0, 10] },
+        yaxis: { title: 'Test 2 Score', range: [0, 10] },
+        shapes: shapes,
+        showlegend: false
+      });
+      
+      Plotly.react(plotEl, traces, layout, ML.plotConfig);
+    }
+    
+    threshSlider.addEventListener('input', ML.throttledRedraw((e) => {
+      threshold = parseFloat(e.target.value);
+      draw();
+    }));
+    
+    btnLearn.addEventListener('click', () => {
+      showModel = true;
+      draw();
+    });
+    
+    btnReset.addEventListener('click', () => {
+      threshold = 5.0;
+      threshSlider.value = 5.0;
+      showModel = false;
+      draw();
+    });
+    
+    draw();
+  });
+
+  // =========================================================================
+  // WIDGET 11: ML Categories
+  // =========================================================================
+  ML.lazyInit('w11_area', function() {
+    const area = document.getElementById('w11_area');
+    
+    area.innerHTML = `
+      <p>Machine Learning is generally split into three main paradigms depending on how the data is provided and what feedback the model receives.</p>
+      
+      <div class="challenge">
+        <div class="ch-title">Challenge: Sort the Examples</div>
+        <p style="font-size: 0.9rem; margin-bottom:1rem;">Click an example to select it, then click the correct category bucket to drop it in. Can you sort all 8 correctly?</p>
+        
+        <div id="w11_items" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom: 1.5rem; min-height: 40px;">
+          <!-- items go here -->
+        </div>
+        
+        <div class="side-by-side" style="gap:0.5rem;">
+          <div class="w11-bucket" data-cat="sup" style="background:rgba(31,138,133,0.1); border:2px solid var(--teal); border-radius:var(--radius); padding:1rem; text-align:center; cursor:pointer;">
+            <h4 style="color:var(--teal); margin-bottom:0.5rem;">Supervised</h4>
+            <p style="font-size:0.75rem; color:var(--ink-soft);">Learning with labeled answers</p>
+            <div class="w11-content" style="min-height:50px; display:flex; flex-direction:column; gap:0.3rem;"></div>
+          </div>
+          
+          <div class="w11-bucket" data-cat="unsup" style="background:rgba(59,82,139,0.1); border:2px solid var(--indigo); border-radius:var(--radius); padding:1rem; text-align:center; cursor:pointer;">
+            <h4 style="color:var(--indigo); margin-bottom:0.5rem;">Unsupervised</h4>
+            <p style="font-size:0.75rem; color:var(--ink-soft);">Finding hidden patterns</p>
+            <div class="w11-content" style="min-height:50px; display:flex; flex-direction:column; gap:0.3rem;"></div>
+          </div>
+          
+          <div class="w11-bucket" data-cat="rl" style="background:rgba(178,58,107,0.1); border:2px solid var(--rose); border-radius:var(--radius); padding:1rem; text-align:center; cursor:pointer;">
+            <h4 style="color:var(--rose); margin-bottom:0.5rem;">Reinforcement</h4>
+            <p style="font-size:0.75rem; color:var(--ink-soft);">Learning by trial and error</p>
+            <div class="w11-content" style="min-height:50px; display:flex; flex-direction:column; gap:0.3rem;"></div>
+          </div>
+        </div>
+        
+        <div class="ch-win" id="w11_win">🎉 All sorted! You've mastered the ML paradigms!</div>
+        <button class="btn btn-reset mt-2" id="w11_reset">Reset Challenge</button>
+      </div>
+    `;
+    
+    const tasks = [
+      { id: 't1', text: "House price prediction", cat: "sup" },
+      { id: 't2', text: "Spam detection", cat: "sup" },
+      { id: 't3', text: "Customer segmentation", cat: "unsup" },
+      { id: 't4', text: "Anomaly detection", cat: "unsup" },
+      { id: 't5', text: "Robot walking", cat: "rl" },
+      { id: 't6', text: "Game playing (Chess)", cat: "rl" },
+      { id: 't7', text: "Image classification", cat: "sup" },
+      { id: 't8', text: "Topic modeling (Grouping articles)", cat: "unsup" }
+    ];
+    
+    const itemsContainer = document.getElementById('w11_items');
+    const buckets = document.querySelectorAll('.w11-bucket');
+    const winMsg = document.getElementById('w11_win');
+    const btnReset = document.getElementById('w11_reset');
+    const challengeDiv = document.querySelector('.challenge');
+    
+    let selectedTask = null;
+    let correctCount = 0;
+    
+    function initTasks() {
+      itemsContainer.innerHTML = '';
+      buckets.forEach(b => b.querySelector('.w11-content').innerHTML = '');
+      winMsg.style.display = 'none';
+      challengeDiv.classList.remove('success');
+      selectedTask = null;
+      correctCount = 0;
+      
+      const shuffled = new ML.SeededRNG().shuffle([...tasks]);
+      shuffled.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'btn';
+        div.textContent = t.text;
+        div.dataset.id = t.id;
+        div.dataset.cat = t.cat;
+        div.style.background = '#fff';
+        
+        div.addEventListener('click', () => {
+          if (div.parentElement !== itemsContainer) return; // already sorted
+          // Deselect others
+          Array.from(itemsContainer.children).forEach(c => {
+            c.style.background = '#fff';
+            c.style.borderColor = 'var(--rule)';
+          });
+          div.style.background = 'var(--panel)';
+          div.style.borderColor = 'var(--indigo)';
+          selectedTask = div;
+        });
+        
+        itemsContainer.appendChild(div);
+      });
+    }
+    
+    buckets.forEach(bucket => {
+      bucket.addEventListener('click', () => {
+        if (!selectedTask) return;
+        const targetCat = bucket.getAttribute('data-cat');
+        const taskCat = selectedTask.dataset.cat;
+        
+        if (targetCat === taskCat) {
+          // Correct
+          selectedTask.style.background = 'transparent';
+          selectedTask.style.borderColor = 'transparent';
+          selectedTask.style.padding = '0';
+          selectedTask.style.fontSize = '0.75rem';
+          selectedTask.style.cursor = 'default';
+          selectedTask.textContent = "✓ " + selectedTask.textContent;
+          bucket.querySelector('.w11-content').appendChild(selectedTask);
+          selectedTask = null;
+          correctCount++;
+          
+          if (correctCount === tasks.length) {
+            challengeDiv.classList.add('success');
+          }
+        } else {
+          // Incorrect flash
+          const origBg = selectedTask.style.background;
+          selectedTask.style.background = 'var(--rose)';
+          selectedTask.style.color = '#fff';
+          setTimeout(() => {
+            if (selectedTask) {
+              selectedTask.style.background = origBg;
+              selectedTask.style.color = 'inherit';
+            }
+          }, 400);
+        }
+      });
+    });
+    
+    btnReset.addEventListener('click', initTasks);
+    
+    initTasks();
+  });
+
+  // =========================================================================
+  // WIDGET 12: Session Roadmap
+  // =========================================================================
+  ML.lazyInit('w12_area', function() {
+    const area = document.getElementById('w12_area');
+    
+    area.innerHTML = `
+      <p>Now that we have covered the mathematical prerequisites and surveyed the broad landscape of AI, it is time to dive deep into a specific, foundational algorithm.</p>
+      <p>Here is our map for the rest of the session. We will build up to <strong>Regularized Multiple Linear Regression</strong>, deriving everything from first principles.</p>
+      
+      <div style="background:var(--panel); border:1px solid var(--rule); border-radius:var(--radius); padding:2rem; overflow-x:auto;">
+        <svg viewBox="0 0 800 250" style="width:100%; min-width:600px;">
+          <!-- Path -->
+          <path d="M 50 125 L 200 125 L 350 125 L 500 125 L 650 125 L 750 125" fill="none" stroke="var(--rule)" stroke-width="4" stroke-dasharray="10,5" />
+          
+          <!-- Nodes -->
+          <g transform="translate(50, 125)">
+            <circle r="15" fill="var(--teal)"/>
+            <text y="30" text-anchor="middle" font-family="var(--font-h)" font-size="12" font-weight="bold" fill="var(--ink)">Math Prerequisites</text>
+            <text y="45" text-anchor="middle" font-family="var(--font-b)" font-size="10" fill="var(--ink-soft)">Vectors, Matrices, Gradients</text>
+            <text y="-5" text-anchor="middle" font-size="12" fill="#fff">✓</text>
+          </g>
+          
+          <g transform="translate(200, 125)">
+            <circle r="15" fill="var(--teal)"/>
+            <text y="30" text-anchor="middle" font-family="var(--font-h)" font-size="12" font-weight="bold" fill="var(--ink)">AI/ML Overview</text>
+            <text y="45" text-anchor="middle" font-family="var(--font-b)" font-size="10" fill="var(--ink-soft)">History & Concepts</text>
+            <text y="-5" text-anchor="middle" font-size="12" fill="#fff">✓</text>
+          </g>
+          
+          <!-- Current -->
+          <g transform="translate(350, 125)">
+            <circle r="22" fill="#fff" stroke="var(--indigo)" stroke-width="4"/>
+            <circle r="10" fill="var(--indigo)">
+              <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <text y="-35" text-anchor="middle" font-family="var(--font-h)" font-size="12" font-weight="bold" fill="var(--indigo)">YOU ARE HERE</text>
+            <text y="35" text-anchor="middle" font-family="var(--font-h)" font-size="14" font-weight="bold" fill="var(--indigo)">Regression</text>
+            <text y="50" text-anchor="middle" font-family="var(--font-b)" font-size="10" fill="var(--ink-soft)">OLS & Gradient Descent</text>
+          </g>
+          
+          <g transform="translate(500, 125)">
+            <circle r="15" fill="#fff" stroke="var(--rule)" stroke-width="3"/>
+            <text y="30" text-anchor="middle" font-family="var(--font-h)" font-size="12" font-weight="bold" fill="var(--ink)">Generalization</text>
+            <text y="45" text-anchor="middle" font-family="var(--font-b)" font-size="10" fill="var(--ink-soft)">Bias-Variance, Regularization</text>
+          </g>
+          
+          <g transform="translate(650, 125)">
+            <circle r="15" fill="#fff" stroke="var(--rule)" stroke-width="3"/>
+            <text y="30" text-anchor="middle" font-family="var(--font-h)" font-size="12" font-weight="bold" fill="var(--ink)">Capstone</text>
+            <text y="45" text-anchor="middle" font-family="var(--font-b)" font-size="10" fill="var(--ink-soft)">Interactive Quiz & Sandbox</text>
+          </g>
+          
+          <!-- Future Path (dim) -->
+          <path d="M 750 125 Q 780 125 780 80 T 820 50" fill="none" stroke="var(--rule)" stroke-width="2" stroke-dasharray="4,4" opacity="0.5"/>
+          <text x="730" y="70" font-family="var(--font-b)" font-size="10" fill="var(--ink-soft)" opacity="0.7">Future: Neural Nets, Trees...</text>
+        </svg>
+      </div>
+    `;
+  });
+
+})();
+
+
+// === MODULE 3A WIDGETS ===
+// Module 3a Widgets: 13-18 (Core Regression)
+// Each widget is an IIFE registered with ML.lazyInit
+
+// ============================================================
+// WIDGET 13 — Matrix Representation: y = Xw
+// ============================================================
+ML.lazyInit('w13_area', function(){
+  const area = document.getElementById('w13_area');
+  area.innerHTML = `
+    <p>Every regression problem can be written as a single matrix equation. Your data table — rows of measurements — becomes the <strong>design matrix</strong> \\(\\mathbf{X}\\). The column of outputs becomes the <strong>target vector</strong> \\(\\mathbf{y}\\). And the model's job is to find a <strong>weight vector</strong> \\(\\mathbf{w}\\) such that \\(\\mathbf{Xw} \\approx \\mathbf{y}\\).</p>
+    <p>We always add a column of 1s to \\(\\mathbf{X}\\) — this is the <strong>bias (intercept) column</strong>. It lets the model shift the prediction up or down without needing any input feature to do it.</p>
+    <p>Try editing the data table below. Watch how the matrix equation updates live. Hover over any cell to see which data point it corresponds to.</p>
+
+    <div class="widget-full">
+      <div class="btn-group mb-1">
+        <button class="btn btn-sm" id="w13_add">+ Add Row</button>
+        <button class="btn btn-sm" id="w13_del">− Remove Row</button>
+        <button class="btn btn-sm" id="w13_tog" data-feat="1">Toggle 2 Features</button>
+        <button class="btn btn-reset" id="w13_reset">Reset</button>
+      </div>
+      <div class="side-by-side" id="w13_tables">
+        <div>
+          <div class="text-sm text-muted mb-1"><strong>Data Table</strong></div>
+          <div id="w13_data" class="matrix-display"></div>
+        </div>
+        <div>
+          <div class="text-sm text-muted mb-1"><strong>Matrix Equation: y = Xw</strong></div>
+          <div id="w13_eq" style="overflow-x:auto"></div>
+        </div>
+      </div>
+      <div class="readout mt-1" id="w13_readout"></div>
+    </div>
+
+    $$\\mathbf{y} = \\mathbf{X}\\mathbf{w} = \\begin{bmatrix} 1 & x_{1} \\\\ 1 & x_{2} \\\\ \\vdots & \\vdots \\\\ 1 & x_{n} \\end{bmatrix} \\begin{bmatrix} w_0 \\\\ w_1 \\end{bmatrix}$$
+
+    <details class="check">
+      <summary>Why do we need the column of 1s?</summary>
+      <div class="ans">Without it, the model is forced through the origin — the prediction at \\(x=0\\) would always be 0. The column of 1s multiplies \\(w_0\\), giving us a free <em>intercept</em> (y-offset).</div>
+    </details>
+    <div class="misconception">The bias column is not a "feature" from the data — it's a constant we add ourselves so that the matrix equation can represent an intercept. Every row gets a 1.</div>
+  `;
+  if(typeof renderMathInElement==='function') renderMathInElement(area);
+
+  let nFeat = 1;
+  const defaultData1 = [[1,2],[2,2.8],[3,4.2],[4,3.9],[5,5.5]];
+  const defaultData2 = [[1,3,2],[2,1,2.8],[3,2,4.2],[4,4,3.9],[5,2,5.5]];
+  let data = defaultData1.map(r=>[...r]);
+  let highlightRow = -1;
+
+  function render(){
+    const nCol = nFeat + 1; // feature cols + y
+    // Data table
+    let html = '<table><thead><tr>';
+    const headers = nFeat===1 ? ['x','y'] : ['x₁','x₂','y'];
+    headers.forEach(h => html += `<th style="padding:3px 8px;font-size:.8rem;color:var(--ink-soft)">${h}</th>`);
+    html += '</tr></thead><tbody>';
+    data.forEach((row, i) => {
+      html += `<tr class="${i===highlightRow?'highlight':''}" data-row="${i}">`;
+      row.forEach((v, j) => {
+        html += `<td class="${i===highlightRow?'highlight':''}" data-row="${i}" data-col="${j}" contenteditable="true" style="min-width:40px;cursor:text">${ML.fmt(v,1)}</td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('w13_data').innerHTML = html;
+
+    // Build design matrix X (with bias column)
+    const X = data.map(row => {
+      const r = [1];
+      for(let j = 0; j < nFeat; j++) r.push(row[j]);
+      return r;
+    });
+    const y = data.map(row => row[row.length - 1]);
+    const w = ML.olsSolve(X, y);
+
+    // Matrix equation display
+    let eqHtml = '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.82rem;font-family:Courier New,monospace">';
+    // y vector
+    eqHtml += '<div><div style="text-align:center;font-size:.7rem;color:var(--ink-soft);margin-bottom:2px">y</div><table style="border:2px solid var(--indigo);border-radius:3px">';
+    y.forEach((v,i) => eqHtml += `<tr><td style="padding:2px 6px;${i===highlightRow?'background:rgba(59,82,139,.15)':''}">${ML.fmt(v,1)}</td></tr>`);
+    eqHtml += '</table></div><div style="font-size:1.2rem">=</div>';
+    // X matrix
+    eqHtml += '<div><div style="text-align:center;font-size:.7rem;color:var(--ink-soft);margin-bottom:2px">X</div><table style="border:2px solid var(--teal);border-radius:3px">';
+    X.forEach((row,i) => {
+      eqHtml += `<tr>`;
+      row.forEach((v,j) => eqHtml += `<td style="padding:2px 6px;${i===highlightRow?'background:rgba(31,138,133,.12)':''}">${j===0?'1':ML.fmt(v,1)}</td>`);
+      eqHtml += '</tr>';
+    });
+    eqHtml += '</table></div>';
+    // w vector
+    if(w){
+      eqHtml += '<div><div style="text-align:center;font-size:.7rem;color:var(--ink-soft);margin-bottom:2px">w</div><table style="border:2px solid var(--plum);border-radius:3px">';
+      w.forEach((v,i) => eqHtml += `<tr><td style="padding:2px 6px">${ML.fmt(v,2)}</td></tr>`);
+      eqHtml += '</table></div>';
+    }
+    eqHtml += '</div>';
+    document.getElementById('w13_eq').innerHTML = eqHtml;
+
+    // Readout
+    if(w){
+      const yhat = ML.predictions(X, w);
+      const r2 = ML.rSquared(X, y, w);
+      const sse = ML.sseLoss(X, y, w);
+      let rStr = `<b>Fitted weights:</b> w = [${w.map(v=>ML.fmt(v,3)).join(', ')}]\n`;
+      rStr += `<b>SSE:</b> ${ML.fmt(sse,3)}   <b>R²:</b> ${ML.fmt(r2,4)}   <b>n:</b> ${data.length}   <b>d:</b> ${nFeat+1}`;
+      document.getElementById('w13_readout').innerHTML = rStr;
+    } else {
+      document.getElementById('w13_readout').innerHTML = '<span style="color:var(--rose)">Matrix is singular — cannot solve.</span>';
+    }
+  }
+
+  // Event delegation for editable cells
+  document.getElementById('w13_data').addEventListener('blur', function(e){
+    if(e.target.tagName==='TD' && e.target.dataset.row!==undefined){
+      const r = +e.target.dataset.row, c = +e.target.dataset.col;
+      const v = parseFloat(e.target.textContent);
+      if(!isNaN(v)) data[r][c] = v;
+      render();
+    }
+  }, true);
+
+  document.getElementById('w13_data').addEventListener('mouseover', function(e){
+    if(e.target.dataset.row!==undefined){
+      highlightRow = +e.target.dataset.row;
+      render();
+    }
+  });
+  document.getElementById('w13_data').addEventListener('mouseout', function(){
+    highlightRow = -1;
+    render();
+  });
+
+  document.getElementById('w13_add').onclick = () => {
+    const cols = nFeat + 1;
+    const row = new Array(cols).fill(0);
+    row[0] = data.length + 1;
+    row[cols-1] = row[0] * 1.2;
+    data.push(row);
+    render();
+  };
+  document.getElementById('w13_del').onclick = () => {
+    if(data.length > 2) data.pop();
+    render();
+  };
+  document.getElementById('w13_tog').onclick = function(){
+    nFeat = nFeat === 1 ? 2 : 1;
+    this.textContent = nFeat === 1 ? 'Toggle 2 Features' : 'Toggle 1 Feature';
+    data = (nFeat === 1 ? defaultData1 : defaultData2).map(r=>[...r]);
+    render();
+  };
+  document.getElementById('w13_reset').onclick = () => {
+    nFeat = 1;
+    data = defaultData1.map(r=>[...r]);
+    document.getElementById('w13_tog').textContent = 'Toggle 2 Features';
+    render();
+  };
+
+  render();
+});
+
+
+// ============================================================
+// WIDGET 14 — Line and Plane Fitting
+// ============================================================
+ML.lazyInit('w14_area', function(){
+  const area = document.getElementById('w14_area');
+  area.innerHTML = `
+    <p>A linear model with one input draws a <strong>line</strong>: \\(\\hat{y} = w_0 + w_1 x\\). With two inputs, it draws a <strong>plane</strong>: \\(\\hat{y} = w_0 + w_1 x_1 + w_2 x_2\\). The <strong>residuals</strong> — vertical distances from each point to the line/plane — show how wrong the model is.</p>
+    <p>Drag the sliders to change \\(w_0\\) (intercept) and \\(w_1\\) (slope). Can you minimise the Sum of Squared Errors (SSE) by hand?</p>
+
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>w₀ (intercept) <span class="val" id="w14_v0">1.0</span>
+          <input type="range" id="w14_w0" min="-5" max="5" step="0.1" value="1">
+        </label>
+        <label>w₁ (slope) <span class="val" id="w14_v1">0.5</span>
+          <input type="range" id="w14_w1" min="-3" max="3" step="0.05" value="0.5">
+        </label>
+        <div class="presets">
+          <button data-w0="1" data-w1="0.5">Default</button>
+          <button id="w14_ols">OLS Best Fit</button>
+        </div>
+        <label><input type="checkbox" id="w14_resid"> Show residuals</label>
+        <label><input type="checkbox" id="w14_sse_show" checked> Show SSE</label>
+        <div class="readout" id="w14_readout"></div>
+        <button class="btn btn-reset" id="w14_reset">Reset</button>
+      </div>
+      <div class="widget-plot" id="w14_plot"></div>
+    </div>
+
+    <div class="challenge">
+      <div class="ch-title">Set w₀ and w₁ so that SSE < 5</div>
+      <div id="w14_challenge_status"></div>
+      <div class="ch-win">✅ Challenge Complete!</div>
+    </div>
+
+    <details class="check">
+      <summary>If you double w₁, what happens to the line?</summary>
+      <div class="ans">The line gets twice as steep — its slope doubles. But the SSE will likely increase unless the data happens to follow that steeper slope.</div>
+    </details>
+    <div class="misconception">The "best fit" line doesn't have to pass through any data point. It minimises the <em>total</em> squared vertical distances, which usually means it passes <em>between</em> the points.</div>
+  `;
+  if(typeof renderMathInElement==='function') renderMathInElement(area);
+
+  const dataset = ML.noisyLine(25, 1, 0.8, 1.2, 314);
+  const X = ML.designMatrix([dataset.x]);
+  const wOLS = ML.olsSolve(X, dataset.y);
+
+  const redraw = ML.throttledRedraw(function(){
+    const w0 = +document.getElementById('w14_w0').value;
+    const w1 = +document.getElementById('w14_w1').value;
+    document.getElementById('w14_v0').textContent = w0.toFixed(1);
+    document.getElementById('w14_v1').textContent = w1.toFixed(2);
+    const w = [w0, w1];
+    const sse = ML.sseLoss(X, dataset.y, w);
+    const r2 = ML.rSquared(X, dataset.y, w);
+
+    const traces = [{
+      x: dataset.x, y: dataset.y, mode: 'markers',
+      marker: {color: ML.plotColors.data, size: 7},
+      name: 'Data', type: 'scatter'
+    }];
+
+    // Model line
+    const xLine = [-6, 6];
+    traces.push({
+      x: xLine, y: xLine.map(x => w0 + w1 * x),
+      mode: 'lines', line: {color: ML.plotColors.model, width: 2.5},
+      name: 'Model', type: 'scatter'
+    });
+
+    // Residuals
+    if(document.getElementById('w14_resid').checked){
+      dataset.x.forEach((xi, i) => {
+        const yhat = w0 + w1 * xi;
+        traces.push({
+          x: [xi, xi], y: [dataset.y[i], yhat],
+          mode: 'lines', line: {color: ML.plotColors.residual, width: 1, dash: 'dot'},
+          showlegend: false, type: 'scatter', hoverinfo: 'skip'
+        });
+      });
+    }
+
+    const layout = ML.plotLayout({
+      xaxis: {title: 'x', range: [-6, 6], gridcolor:'#E8EAE4',zerolinecolor:'#D9DCD4'},
+      yaxis: {title: 'y', range: [-8, 10], gridcolor:'#E8EAE4',zerolinecolor:'#D9DCD4'},
+      showlegend: true,
+      legend: {x: 0.01, y: 0.99, bgcolor: 'rgba(255,255,255,0.8)', font:{size:11}},
+      title: document.getElementById('w14_sse_show').checked ? `SSE = ${ML.fmt(sse,2)}` : ''
+    });
+
+    Plotly.react('w14_plot', traces, layout, ML.plotConfig);
+
+    let rd = `<b>SSE:</b> ${ML.fmt(sse,2)}   <b>R²:</b> ${ML.fmt(r2,3)}`;
+    if(wOLS) rd += `\n<b>OLS best:</b> w=[${wOLS.map(v=>ML.fmt(v,3)).join(', ')}]`;
+    document.getElementById('w14_readout').innerHTML = rd;
+
+    // Challenge check
+    const ch = document.querySelector('#w14_area .challenge');
+    if(sse < 5){ ch.classList.add('success'); }
+    else { ch.classList.remove('success'); }
+  });
+
+  ['w14_w0','w14_w1'].forEach(id => document.getElementById(id).addEventListener('input', redraw));
+  ['w14_resid','w14_sse_show'].forEach(id => document.getElementById(id).addEventListener('change', redraw));
+
+  // Presets
+  document.querySelectorAll('#w14_area .presets button[data-w0]').forEach(btn => {
+    btn.onclick = () => {
+      document.getElementById('w14_w0').value = btn.dataset.w0;
+      document.getElementById('w14_w1').value = btn.dataset.w1;
+      redraw();
+    };
+  });
+  document.getElementById('w14_ols').onclick = () => {
+    if(wOLS){
+      document.getElementById('w14_w0').value = ML.clamp(wOLS[0],-5,5);
+      document.getElementById('w14_w1').value = ML.clamp(wOLS[1],-3,3);
+      redraw();
+    }
+  };
+  document.getElementById('w14_reset').onclick = () => {
+    document.getElementById('w14_w0').value = 1;
+    document.getElementById('w14_w1').value = 0.5;
+    document.getElementById('w14_resid').checked = false;
+    document.getElementById('w14_sse_show').checked = true;
+    redraw();
+  };
+
+  redraw();
+});
+
+
+// ============================================================
+// WIDGET 15 — OLS & Projection Geometry
+// ============================================================
+ML.lazyInit('w15_area', function(){
+  const area = document.getElementById('w15_area');
+  area.innerHTML = `
+    <p>Ordinary Least Squares (OLS) has a beautiful geometric interpretation. The predicted values \\(\\hat{\\mathbf{y}} = \\mathbf{X}\\mathbf{w}\\) are the <strong>orthogonal projection</strong> of \\(\\mathbf{y}\\) onto the column space of \\(\\mathbf{X}\\). The residual \\(\\mathbf{r} = \\mathbf{y} - \\hat{\\mathbf{y}}\\) is perpendicular to every column of \\(\\mathbf{X}\\).</p>
+    <p>This means \\(\\mathbf{X}^T \\mathbf{r} = \\mathbf{0}\\) — the <strong>normal equations</strong>. Left panel: residuals in data space. Right panel: the geometric column-space view (for 3 data points).</p>
+
+    <div class="side-by-side">
+      <div>
+        <div class="text-sm text-muted mb-1"><strong>Data Space</strong> — residuals from points to line</div>
+        <div class="widget-plot" id="w15_data_plot" style="height:320px"></div>
+      </div>
+      <div>
+        <div class="text-sm text-muted mb-1"><strong>Column Space View</strong> — y projected onto span(X)</div>
+        <div class="widget-plot" id="w15_col_plot" style="height:320px"></div>
+      </div>
+    </div>
+    <div class="readout mt-1" id="w15_readout"></div>
+    <button class="btn btn-reset mt-1" id="w15_reset">Reset</button>
+
+    $$\\hat{\\mathbf{y}} = \\mathbf{X}(\\mathbf{X}^T\\mathbf{X})^{-1}\\mathbf{X}^T\\mathbf{y}, \\quad \\mathbf{X}^T(\\mathbf{y} - \\hat{\\mathbf{y}}) = \\mathbf{0}$$
+
+    <details class="check">
+      <summary>Why must the residual be perpendicular to the column space?</summary>
+      <div class="ans">Because any component of the residual that lies <em>within</em> the column space could be reduced by adjusting \\(\\mathbf{w}\\). At the optimum, there's nowhere left to go — the residual is entirely in the orthogonal complement.</div>
+    </details>
+    <div class="misconception">Projection isn't about physical space — it's about the abstract space \\(\\mathbb{R}^n\\) where each data point contributes one dimension. The "plane" in the column-space view is spanned by the columns of X, not by the features.</div>
+  `;
+  if(typeof renderMathInElement==='function') renderMathInElement(area);
+
+  // Use 3 data points for the column-space view (R^3)
+  const xs = [1, 3, 5];
+  const ys = [2.2, 3.8, 5.8];
+  const X = xs.map(x => [1, x]);
+  const w = ML.olsSolve(X, ys);
+  const yhat = ML.predictions(X, w);
+  const resid = ys.map((yi,i) => yi - yhat[i]);
+
+  function drawDataSpace(){
+    const traces = [
+      {x:xs, y:ys, mode:'markers', marker:{color:ML.plotColors.data,size:9}, name:'Data (y)', type:'scatter'},
+      {x:[-1,7], y:[-1,7].map(x=>w[0]+w[1]*x), mode:'lines', line:{color:ML.plotColors.model,width:2}, name:'Fit (ŷ)', type:'scatter'},
+    ];
+    xs.forEach((xi,i) => {
+      traces.push({x:[xi,xi],y:[ys[i],yhat[i]],mode:'lines',line:{color:ML.plotColors.residual,width:2,dash:'dot'},showlegend:i===0,name:i===0?'Residuals':'',type:'scatter',hoverinfo:'skip'});
+    });
+    Plotly.react('w15_data_plot', traces, ML.plotLayout({
+      xaxis:{title:'x',range:[-0.5,6.5]},yaxis:{title:'y',range:[0,7.5]},
+      showlegend:true,legend:{x:.01,y:.99,bgcolor:'rgba(255,255,255,.8)',font:{size:10}},
+      margin:{l:40,r:10,t:10,b:35}
+    }), ML.plotConfig);
+  }
+
+  function drawColSpace(){
+    // In R^3, col1 = [1,1,1], col2 = [x1,x2,x3]
+    const c1 = [1,1,1], c2 = xs;
+    // y, yhat, residual as 3D vectors
+    const traces = [
+      {x:[0,ys[0]],y:[0,ys[1]],z:[0,ys[2]],mode:'lines+markers',line:{color:ML.plotColors.data,width:4},marker:{size:4},name:'y',type:'scatter3d'},
+      {x:[0,yhat[0]],y:[0,yhat[1]],z:[0,yhat[2]],mode:'lines+markers',line:{color:ML.plotColors.model,width:4},marker:{size:4},name:'ŷ (projection)',type:'scatter3d'},
+      {x:[yhat[0],ys[0]],y:[yhat[1],ys[1]],z:[yhat[2],ys[2]],mode:'lines',line:{color:ML.plotColors.residual,width:3,dash:'dot'},name:'r = y − ŷ',type:'scatter3d'},
+      // Column space plane
+      {x:[0,3*c1[0]],y:[0,3*c1[1]],z:[0,3*c1[2]],mode:'lines',line:{color:'rgba(31,138,133,.3)',width:2},name:'col 1 (ones)',type:'scatter3d',showlegend:false},
+      {x:[0,c2[0]],y:[0,c2[1]],z:[0,c2[2]],mode:'lines',line:{color:'rgba(31,138,133,.5)',width:2},name:'col 2 (x)',type:'scatter3d',showlegend:false},
+    ];
+    Plotly.react('w15_col_plot', traces, {
+      paper_bgcolor:'rgba(0,0,0,0)',
+      scene:{
+        xaxis:{title:'dim 1',range:[-1,7]},yaxis:{title:'dim 2',range:[-1,7]},zaxis:{title:'dim 3',range:[-1,7]},
+        camera:{eye:{x:1.8,y:1.2,z:0.8}},
+        aspectmode:'cube'
+      },
+      font:{family:'Source Serif 4, serif',size:11,color:'#1A1F2E'},
+      margin:{l:0,r:0,t:0,b:0},
+      showlegend:true,legend:{x:.7,y:.95,font:{size:10}}
+    }, ML.plotConfig);
+  }
+
+  // X^T r check
+  const Xt = ML.transpose(X);
+  const Xtr = ML.matvec(Xt, resid);
+  let rd = `<b>X^T r =</b> [${Xtr.map(v=>ML.fmt(v,6)).join(', ')}]  (should be ≈ 0)\n`;
+  rd += `<b>w =</b> [${w.map(v=>ML.fmt(v,4)).join(', ')}]   <b>||r|| =</b> ${ML.fmt(ML.vnorm(resid),4)}`;
+  document.getElementById('w15_readout').innerHTML = rd;
+
+  document.getElementById('w15_reset').onclick = () => { drawDataSpace(); drawColSpace(); };
+  drawDataSpace();
+  drawColSpace();
+});
+
+
+// ============================================================
+// WIDGET 16 — Loss Contours
+// ============================================================
+ML.lazyInit('w16_area', function(){
+  const area = document.getElementById('w16_area');
+  area.innerHTML = `
+    <p>The loss function \\(J(w_0, w_1) = \\frac{1}{n}\\sum(y_i - w_0 - w_1 x_i)^2\\) defines a <strong>surface</strong> over the weight space. Every point \\((w_0, w_1)\\) corresponds to a different line, and the height is how wrong that line is.</p>
+    <p>For ordinary least squares, this surface is always a <strong>paraboloid</strong> (bowl shape) — it has exactly one minimum. The contour lines are ellipses whose shape depends on the data's feature correlations and scales.</p>
+    <p><strong>Predict, then reveal:</strong> If you increase the correlation between features, what happens to the contour ellipses?</p>
+
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>Feature correlation <span class="val" id="w16_vc">0.0</span>
+          <input type="range" id="w16_corr" min="0" max="0.95" step="0.05" value="0">
+        </label>
+        <label>Feature scale ratio <span class="val" id="w16_vs">1.0</span>
+          <input type="range" id="w16_scale" min="1" max="20" step="0.5" value="1">
+        </label>
+        <label>Drag w₀ <span class="val" id="w16_dw0">0.0</span></label>
+        <label>Drag w₁ <span class="val" id="w16_dw1">0.0</span></label>
+        <div class="readout" id="w16_readout"></div>
+        <button class="btn btn-reset" id="w16_reset">Reset</button>
+      </div>
+      <div>
+        <div class="side-by-side">
+          <div class="widget-plot" id="w16_contour" style="height:340px"></div>
+          <div class="widget-plot" id="w16_dataplot" style="height:340px"></div>
+        </div>
+      </div>
+    </div>
+
+    <details class="check">
+      <summary>Why do correlated features make the contours narrow?</summary>
+      <div class="ans">When features are correlated, many different combinations of \\(w_0, w_1\\) give similar predictions. The loss changes rapidly in one direction (perpendicular to the correlation) but slowly along it — producing a narrow valley.</div>
+    </details>
+    <div class="misconception">The loss surface for linear regression is always convex (bowl-shaped). It never has local minima that aren't the global minimum. This is a key advantage over nonlinear models.</div>
+  `;
+  if(typeof renderMathInElement==='function') renderMathInElement(area);
+
+  let currentW = [0, 0];
+  const n = 30;
+
+  const redraw = ML.throttledRedraw(function(){
+    const corr = +document.getElementById('w16_corr').value;
+    const scale = +document.getElementById('w16_scale').value;
+    document.getElementById('w16_vc').textContent = corr.toFixed(2);
+    document.getElementById('w16_vs').textContent = scale.toFixed(1);
+
+    // Generate data
+    const dat = ML.noisyLine(n, 2, 1.5, 1.0, 42);
+    // Scale feature
+    const xs = dat.x.map(v => v * scale);
+    const X = ML.designMatrix([xs]);
+    const wOpt = ML.olsSolve(X, dat.y);
+
+    // Contour grid
+    const gw0 = [], gw1 = [], gz = [];
+    const res = 50;
+    const w0Range = wOpt ? [wOpt[0]-4, wOpt[0]+4] : [-4, 8];
+    const w1Range = wOpt ? [wOpt[1]-2/Math.max(1,scale), wOpt[1]+2/Math.max(1,scale)] : [-2, 4];
+
+    for(let i = 0; i <= res; i++){
+      const w0 = w0Range[0] + (w0Range[1]-w0Range[0])*i/res;
+      gw0.push(w0);
+    }
+    for(let j = 0; j <= res; j++){
+      const w1 = w1Range[0] + (w1Range[1]-w1Range[0])*j/res;
+      gw1.push(w1);
+    }
+    for(let j = 0; j <= res; j++){
+      const row = [];
+      for(let i = 0; i <= res; i++){
+        row.push(ML.mseLoss(X, dat.y, [gw0[i], gw1[j]]));
+      }
+      gz.push(row);
+    }
+
+    const traces = [{
+      x: gw0, y: gw1, z: gz, type: 'contour',
+      colorscale: [[0,'#F1F3EE'],[0.3,'#A8D5D0'],[0.6,'#3B528B'],[1,'#4A1E5C']],
+      contours: {coloring:'heatmap'},
+      showscale: false
+    }];
+
+    // Mark current w
+    traces.push({
+      x: [currentW[0]], y: [currentW[1]], mode: 'markers',
+      marker: {color: ML.plotColors.gradient, size: 12, symbol: 'x'},
+      name: 'Current w', type: 'scatter'
+    });
+    // Mark optimum
+    if(wOpt){
+      traces.push({
+        x: [wOpt[0]], y: [wOpt[1]], mode: 'markers',
+        marker: {color: ML.plotColors.model, size: 10, symbol: 'star'},
+        name: 'OLS optimum', type: 'scatter'
+      });
+    }
+
+    // Eigenvectors of X^TX as ellipse axes
+    if(wOpt){
+      const Xt = ML.transpose(X);
+      const XtX = ML.matmul(Xt, X);
+      const eig = ML.eigen2x2Sym(XtX[0][0], XtX[0][1], XtX[1][1]);
+      const cond = Math.max(...eig.values) / Math.max(1e-10, Math.min(...eig.values));
+      document.getElementById('w16_readout').innerHTML =
+        `<b>Loss at cursor:</b> ${ML.fmt(ML.mseLoss(X,dat.y,currentW),3)}\n<b>OLS:</b> [${wOpt.map(v=>ML.fmt(v,3)).join(', ')}]\n<b>Cond(X\u1D40X):</b> ${ML.fmt(cond,1)}\n<b>λ₁, λ₂:</b> ${eig.values.map(v=>ML.fmt(v,1)).join(', ')}`;
+    }
+
+    document.getElementById('w16_dw0').textContent = ML.fmt(currentW[0],2);
+    document.getElementById('w16_dw1').textContent = ML.fmt(currentW[1],2);
+
+    Plotly.react('w16_contour', traces, ML.plotLayout({
+      xaxis:{title:'w₀',range:w0Range},yaxis:{title:'w₁',range:w1Range},
+      showlegend:true,legend:{x:.01,y:.99,font:{size:10},bgcolor:'rgba(255,255,255,.8)'},
+      margin:{l:45,r:10,t:10,b:38}
+    }), ML.plotConfig);
+
+    // Data space plot with current line
+    const dataTraces = [
+      {x:xs,y:dat.y,mode:'markers',marker:{color:ML.plotColors.data,size:6},name:'Data',type:'scatter'},
+      {x:[-6*scale,6*scale],y:[-6*scale,6*scale].map(x=>currentW[0]+currentW[1]*x),mode:'lines',line:{color:ML.plotColors.gradient,width:2,dash:'dash'},name:'Current',type:'scatter'},
+    ];
+    if(wOpt){
+      dataTraces.push({
+        x:[-6*scale,6*scale],y:[-6*scale,6*scale].map(x=>wOpt[0]+wOpt[1]*x),
+        mode:'lines',line:{color:ML.plotColors.model,width:2},name:'OLS',type:'scatter'
+      });
+    }
+    Plotly.react('w16_dataplot', dataTraces, ML.plotLayout({
+      xaxis:{title:'x'},yaxis:{title:'y'},showlegend:true,
+      legend:{x:.01,y:.99,font:{size:10},bgcolor:'rgba(255,255,255,.8)'},
+      margin:{l:40,r:10,t:10,b:35}
+    }), ML.plotConfig);
+  });
+
+  // Click on contour to move w
+  document.getElementById('w16_contour').addEventListener('click', function(){
+    // Use plotly_click
+  });
+  // Use plotly_click event
+  const contourEl = document.getElementById('w16_contour');
+  // After first render, attach click handler
+  setTimeout(()=>{
+    contourEl.on && contourEl.on('plotly_click', function(data){
+      if(data.points && data.points.length > 0){
+        currentW = [data.points[0].x, data.points[0].y];
+        redraw();
+      }
+    });
+  }, 500);
+
+  ['w16_corr','w16_scale'].forEach(id =>
+    document.getElementById(id).addEventListener('input', redraw));
+
+  document.getElementById('w16_reset').onclick = () => {
+    currentW = [0, 0];
+    document.getElementById('w16_corr').value = 0;
+    document.getElementById('w16_scale').value = 1;
+    redraw();
+  };
+
+  redraw();
+});
+
+
+// ============================================================
+// WIDGET 17 — Closed-Form Solution (Normal Equation)
+// ============================================================
+ML.lazyInit('w17_area', function(){
+  const area = document.getElementById('w17_area');
+  area.innerHTML = `
+    <p>Setting the gradient of the MSE loss to zero and solving, we get the <strong>normal equation</strong>:</p>
+    $$\\mathbf{w}^* = (\\mathbf{X}^T \\mathbf{X})^{-1} \\mathbf{X}^T \\mathbf{y}$$
+    <p>This gives the exact optimal weights in one calculation — no iteration needed. But it requires inverting \\(\\mathbf{X}^T\\mathbf{X}\\), which fails if features are linearly dependent (the matrix is <strong>singular</strong>).</p>
+    <p>Below, each intermediate matrix is computed live from the data. Try adding a duplicate feature to see the condition number explode!</p>
+
+    <div class="widget-full">
+      <div class="btn-group mb-1">
+        <button class="btn btn-sm" id="w17_normal">Compute Step-by-Step</button>
+        <button class="btn btn-sm" id="w17_dup" style="color:var(--rose)">Add Collinear Feature</button>
+        <button class="btn btn-reset" id="w17_reset">Reset</button>
+      </div>
+      <div id="w17_steps" style="overflow-x:auto"></div>
+      <div class="readout mt-1" id="w17_readout"></div>
+    </div>
+
+    <details class="check">
+      <summary>What happens to the condition number when features are nearly collinear?</summary>
+      <div class="ans">It grows very large (→ ∞ for exactly collinear). This means tiny changes in the data cause huge changes in \\(\\mathbf{w}\\) — the solution is numerically unstable.</div>
+    </details>
+    <div class="misconception">The closed-form solution isn't always better than gradient descent. For very large datasets (millions of rows), inverting X\u1D40X is expensive (O(d³) in the number of features), while GD can be much faster.</div>
+  `;
+  if(typeof renderMathInElement==='function') renderMathInElement(area);
+
+  let addedDuplicate = false;
+  const baseData = ML.noisyLine(8, 2, 1.5, 0.8, 55);
+
+  function matToHtml(M, label, color){
+    let h = `<div style="display:inline-block;vertical-align:middle;margin:4px"><div style="font-size:.7rem;color:var(--ink-soft);text-align:center">${label}</div>`;
+    h += `<table style="border:2px solid ${color};border-radius:3px;border-collapse:collapse">`;
+    const rows = Array.isArray(M[0]) ? M : M.map(v=>[v]); // handle vectors
+    rows.forEach(row => {
+      h += '<tr>';
+      (Array.isArray(row) ? row : [row]).forEach(v => {
+        h += `<td style="padding:2px 5px;font-size:.75rem;font-family:Courier New,monospace;text-align:right">${ML.fmt(v,3)}</td>`;
+      });
+      h += '</tr>';
+    });
+    h += '</table></div>';
+    return h;
+  }
+
+  function compute(){
+    const xs = [...baseData.x];
+    const feats = [xs];
+    if(addedDuplicate){
+      feats.push(xs.map(v => v + (Math.random() - 0.5) * 0.001)); // near-duplicate
+    }
+    const X = ML.designMatrix(feats);
+    const y = baseData.y;
+    const Xt = ML.transpose(X);
+    const XtX = ML.matmul(Xt, X);
+    const Xty = ML.matvec(Xt, y);
+    const XtXinv = ML.inverse(XtX);
+    const w = XtXinv ? ML.matvec(XtXinv, Xty) : null;
+
+    let html = '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.9rem">';
+    html += '<div style="font-weight:600">Step 1:</div>' + matToHtml(Xt, 'X\u1D40', '#1F8A85');
+    html += '<div>×</div>' + matToHtml(X, 'X', '#3B528B');
+    html += '<div>=</div>' + matToHtml(XtX, 'X\u1D40X', '#4A1E5C');
+    html += '</div>';
+
+    html += '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.9rem;margin-top:8px">';
+    html += '<div style="font-weight:600">Step 2:</div>' + matToHtml(Xt, 'X\u1D40', '#1F8A85');
+    html += '<div>×</div>' + matToHtml(y.map(v=>[v]), 'y', '#3B528B');
+    html += '<div>=</div>' + matToHtml(Xty.map(v=>[v]), 'X\u1D40y', '#4A1E5C');
+    html += '</div>';
+
+    html += '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.9rem;margin-top:8px">';
+    html += '<div style="font-weight:600">Step 3:</div>';
+    if(XtXinv){
+      html += matToHtml(XtXinv, '(X\u1D40X)⁻¹', '#9A8B1E');
+      html += '<div>×</div>' + matToHtml(Xty.map(v=>[v]), 'X\u1D40y', '#4A1E5C');
+      html += '<div>=</div>' + matToHtml(w.map(v=>[v]), 'w*', '#B23A6B');
+    } else {
+      html += '<span style="color:var(--rose);font-weight:600">SINGULAR — cannot invert X\u1D40X!</span>';
+    }
+    html += '</div>';
+    document.getElementById('w17_steps').innerHTML = html;
+
+    const cond = ML.conditionNumber(XtX);
+    let rd = `<b>Condition number:</b> ${ML.fmt(cond,1)}`;
+    if(w) rd += `   <b>w* =</b> [${w.map(v=>ML.fmt(v,4)).join(', ')}]`;
+    if(cond > 1000) rd += '\n<span style="color:var(--rose)">⚠ Very high condition number — solution is numerically unstable!</span>';
+    document.getElementById('w17_readout').innerHTML = rd;
+  }
+
+  document.getElementById('w17_normal').onclick = compute;
+  document.getElementById('w17_dup').onclick = () => {
+    addedDuplicate = !addedDuplicate;
+    document.getElementById('w17_dup').textContent = addedDuplicate ? 'Remove Collinear Feature' : 'Add Collinear Feature';
+    compute();
+  };
+  document.getElementById('w17_reset').onclick = () => {
+    addedDuplicate = false;
+    document.getElementById('w17_dup').textContent = 'Add Collinear Feature';
+    document.getElementById('w17_steps').innerHTML = '<p class="text-muted text-sm">Click "Compute Step-by-Step" to see the normal equation solved.</p>';
+    document.getElementById('w17_readout').innerHTML = '';
+  };
+
+  compute();
+});
+
+
+// ============================================================
+// WIDGET 18 — Gradient Descent
+// ============================================================
+ML.lazyInit('w18_area', function(){
+  const area = document.getElementById('w18_area');
+  area.innerHTML = `
+    <p>Instead of solving the normal equation directly, <strong>gradient descent</strong> starts at a random point and iteratively walks downhill. At each step, it computes the <strong>gradient</strong> \\(\\nabla J(\\mathbf{w})\\) — which points uphill — and moves in the <em>opposite</em> direction:</p>
+    $$\\mathbf{w}_{t+1} = \\mathbf{w}_t - \\alpha \\nabla J(\\mathbf{w}_t)$$
+    <p>where \\(\\alpha\\) is the <strong>learning rate</strong> — how big each step is.</p>
+
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>Learning rate α <span class="val" id="w18_vlr">0.01</span>
+          <input type="range" id="w18_lr" min="-4" max="0" step="0.1" value="-2">
+        </label>
+        <label>Starting w₀ <span class="val" id="w18_vs0">-3</span>
+          <input type="range" id="w18_s0" min="-5" max="5" step="0.5" value="-3">
+        </label>
+        <label>Starting w₁ <span class="val" id="w18_vs1">-2</span>
+          <input type="range" id="w18_s1" min="-3" max="3" step="0.25" value="-2">
+        </label>
+        <div class="btn-group">
+          <button class="btn btn-sm" id="w18_step">Step</button>
+          <button class="btn btn-sm btn-primary" id="w18_play">▶ Play</button>
+          <button class="btn btn-sm" id="w18_pause">⏸ Pause</button>
+          <button class="btn btn-reset" id="w18_reset">Reset</button>
+        </div>
+        <div class="readout" id="w18_readout"></div>
+      </div>
+      <div>
+        <div class="side-by-side">
+          <div class="widget-plot" id="w18_contour" style="height:300px"></div>
+          <div class="widget-plot" id="w18_loss_curve" style="height:300px"></div>
+        </div>
+        <div class="widget-plot" id="w18_data_plot" style="height:250px;margin-top:8px"></div>
+      </div>
+    </div>
+
+    <div class="challenge">
+      <div class="ch-title">Find a starting point and learning rate that converges (loss &lt; 1) in under 30 steps</div>
+      <div class="ch-win">✅ Challenge Complete!</div>
+    </div>
+
+    <details class="check">
+      <summary>What does the gradient vector tell you at any point?</summary>
+      <div class="ans">The gradient points in the direction of <em>steepest increase</em> of the loss. Its magnitude tells you how steep the slope is. We move in the <em>negative</em> gradient direction to decrease the loss.</div>
+    </details>
+    <div class="misconception">Gradient descent doesn't compute the gradient of the data — it computes the gradient of the <em>loss function</em> with respect to the <em>weights</em>. The data is fixed; the weights are what we're adjusting.</div>
+  `;
+  if(typeof renderMathInElement==='function') renderMathInElement(area);
+
+  const dataset = ML.noisyLine(25, 2, 1.5, 1.0, 42);
+  const X = ML.designMatrix([dataset.x]);
+  const wOpt = ML.olsSolve(X, dataset.y);
+
+  let history = [];
+  let animId = null;
+  let step = 0;
+
+  function getParams(){
+    const lr = Math.pow(10, +document.getElementById('w18_lr').value);
+    const s0 = +document.getElementById('w18_s0').value;
+    const s1 = +document.getElementById('w18_s1').value;
+    document.getElementById('w18_vlr').textContent = lr.toExponential(1);
+    document.getElementById('w18_vs0').textContent = s0.toFixed(1);
+    document.getElementById('w18_vs1').textContent = s1.toFixed(1);
+    return {lr, w0: [s0, s1]};
+  }
+
+  function initHistory(){
+    const p = getParams();
+    history = [{w:[...p.w0], loss:ML.mseLoss(X, dataset.y, p.w0), grad:null, iter:0}];
+    step = 0;
+  }
+
+  function doStep(){
+    const p = getParams();
+    const cur = history[history.length - 1];
+    const grad = ML.mseGradient(X, dataset.y, cur.w);
+    const wNew = cur.w.map((wi,i) => wi - p.lr * grad[i]);
+    const loss = ML.mseLoss(X, dataset.y, wNew);
+    step++;
+    history.push({w:wNew, loss, grad, iter:step});
+    if(!isFinite(loss) || loss > 1e10) return false;
+    return true;
+  }
+
+  const redraw = ML.throttledRedraw(function(){
+    const cur = history[history.length - 1];
+
+    // Contour plot with trajectory
+    const res = 50;
+    const w0r = wOpt ? [wOpt[0]-5, wOpt[0]+5] : [-5, 9];
+    const w1r = wOpt ? [wOpt[1]-3, wOpt[1]+3] : [-3, 5];
+    const gw0 = [], gw1 = [], gz = [];
+    for(let i=0;i<=res;i++) gw0.push(w0r[0]+(w0r[1]-w0r[0])*i/res);
+    for(let j=0;j<=res;j++) gw1.push(w1r[0]+(w1r[1]-w1r[0])*j/res);
+    for(let j=0;j<=res;j++){
+      const row=[];
+      for(let i=0;i<=res;i++) row.push(ML.mseLoss(X, dataset.y, [gw0[i], gw1[j]]));
+      gz.push(row);
+    }
+
+    const contourTraces = [
+      {x:gw0,y:gw1,z:gz,type:'contour',showscale:false,
+       colorscale:[[0,'#F1F3EE'],[0.3,'#A8D5D0'],[0.6,'#3B528B'],[1,'#4A1E5C']],
+       contours:{coloring:'heatmap'}},
+      {x:history.map(h=>h.w[0]),y:history.map(h=>h.w[1]),mode:'lines+markers',
+       line:{color:ML.plotColors.gradient,width:2},marker:{size:4,color:ML.plotColors.gradient},
+       name:'GD path',type:'scatter'},
+    ];
+    if(wOpt){
+      contourTraces.push({x:[wOpt[0]],y:[wOpt[1]],mode:'markers',
+        marker:{color:ML.plotColors.model,size:10,symbol:'star'},name:'Optimum',type:'scatter'});
+    }
+    // Gradient arrow at current point
+    if(cur.grad){
+      const scale = 0.5;
+      contourTraces.push({
+        x:[cur.w[0], cur.w[0]-scale*cur.grad[0]],
+        y:[cur.w[1], cur.w[1]-scale*cur.grad[1]],
+        mode:'lines',line:{color:ML.plotColors.residual,width:2},
+        name:'−∇J',type:'scatter',showlegend:history.length<=2
+      });
+    }
+
+    Plotly.react('w18_contour', contourTraces, ML.plotLayout({
+      xaxis:{title:'w₀',range:w0r},yaxis:{title:'w₁',range:w1r},
+      showlegend:true,legend:{x:.01,y:.99,font:{size:9},bgcolor:'rgba(255,255,255,.8)'},
+      margin:{l:42,r:8,t:8,b:35}
+    }), ML.plotConfig);
+
+    // Loss curve
+    Plotly.react('w18_loss_curve', [{
+      x:history.map(h=>h.iter),y:history.map(h=>Math.min(h.loss, 100)),
+      mode:'lines+markers',line:{color:ML.plotColors.residual,width:2},
+      marker:{size:3},name:'Loss',type:'scatter'
+    }], ML.plotLayout({
+      xaxis:{title:'Iteration'},yaxis:{title:'MSE Loss',type:history.some(h=>h.loss>50)?'log':'linear'},
+      margin:{l:50,r:8,t:8,b:35},showlegend:false
+    }), ML.plotConfig);
+
+    // Data plot with evolving line
+    const dataTraces = [
+      {x:dataset.x,y:dataset.y,mode:'markers',marker:{color:ML.plotColors.data,size:6},name:'Data',type:'scatter'},
+      {x:[-6,6],y:[-6,6].map(x=>cur.w[0]+cur.w[1]*x),mode:'lines',
+       line:{color:ML.plotColors.gradient,width:2},name:`Iter ${step}`,type:'scatter'},
+    ];
+    if(wOpt){
+      dataTraces.push({x:[-6,6],y:[-6,6].map(x=>wOpt[0]+wOpt[1]*x),mode:'lines',
+        line:{color:ML.plotColors.model,width:1.5,dash:'dot'},name:'OLS',type:'scatter'});
+    }
+    Plotly.react('w18_data_plot', dataTraces, ML.plotLayout({
+      xaxis:{title:'x',range:[-6,6]},yaxis:{title:'y',range:[-8,12]},
+      showlegend:true,legend:{x:.01,y:.99,font:{size:9},bgcolor:'rgba(255,255,255,.8)'},
+      margin:{l:40,r:8,t:8,b:35}
+    }), ML.plotConfig);
+
+    // Readout
+    const gradNorm = cur.grad ? ML.vnorm(cur.grad) : 0;
+    document.getElementById('w18_readout').innerHTML =
+      `<b>Iter:</b> ${step}  <b>Loss:</b> ${ML.fmt(cur.loss,4)}\n<b>w:</b> [${cur.w.map(v=>ML.fmt(v,3)).join(', ')}]\n<b>||∇J||:</b> ${ML.fmt(gradNorm,4)}`;
+
+    // Challenge
+    const ch = document.querySelector('#w18_area .challenge');
+    if(cur.loss < 1 && step <= 30) ch.classList.add('success');
+  });
+
+  function play(){
+    if(animId) return;
+    animId = setInterval(()=>{
+      if(!doStep()){ pause(); return; }
+      redraw();
+    }, 120);
+  }
+  function pause(){ clearInterval(animId); animId = null; }
+
+  document.getElementById('w18_step').onclick = () => { doStep(); redraw(); };
+  document.getElementById('w18_play').onclick = play;
+  document.getElementById('w18_pause').onclick = pause;
+  document.getElementById('w18_reset').onclick = () => {
+    pause();
+    initHistory();
+    document.querySelector('#w18_area .challenge').classList.remove('success');
+    redraw();
+  };
+
+  ['w18_lr','w18_s0','w18_s1'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      pause();
+      initHistory();
+      redraw();
+    });
+  });
+
+  initHistory();
+  redraw();
+});
+
+
+// === MODULE 3B WIDGETS ===
+// module3b_widgets.js
+
+// ==========================================
+// WIDGET 19: Learning Rate
+// ==========================================
+ML.lazyInit('w19_area', function() {
+  const area = document.getElementById('w19_area');
+  area.innerHTML = `
+    <p>The <strong>learning rate</strong> (\\(\\alpha\\)) determines the size of the steps we take down the loss landscape. It is perhaps the most critical hyperparameter in gradient descent.</p>
+    <p>If \\(\\alpha\\) is too small, convergence takes forever. If it's too large, we might overstep the minimum and bounce back and forth, or even diverge completely (the steps get larger and larger).</p>
+    <p>In the 1D case \\(f(w) = w^2\\), a step is \\(w \\leftarrow w - \\alpha (2w)\\). If \\(\\alpha = 1\\), we bounce from \\(w\\) to \\(-w\\). If \\(\\alpha > 1\\), we diverge!</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>
+          Learning Rate (\\(\\alpha\\)): <span class="val" id="w19_lr_val">0.1</span>
+          <input type="range" id="w19_lr" min="-4" max="1" step="0.1" value="-1">
+        </label>
+        <div class="presets">
+          <button id="w19_p1" class="active">Good</button>
+          <button id="w19_p2">Too Small</button>
+          <button id="w19_p3">Too Large</button>
+        </div>
+        <button class="btn btn-primary" id="w19_run">Run Gradient Descent</button>
+        <button class="btn btn-reset" id="w19_reset">Reset</button>
+        <div class="readout" id="w19_readout"></div>
+      </div>
+      <div>
+        <div id="w19_plot_1d" class="widget-plot" style="height: 250px; margin-bottom:1rem;"></div>
+        <div id="w19_plot_loss" class="widget-plot" style="height: 250px;"></div>
+      </div>
+    </div>
+    <div class="challenge" id="w19_ch">
+      <div class="ch-title">Challenge: Converge in &le; 20 steps</div>
+      <p>Find a learning rate that brings the loss below 0.01 in under 20 iterations.</p>
+      <div class="ch-win">🎉 You found an optimal learning rate!</div>
+    </div>
+    <details class="check">
+      <summary>What is the theoretical maximum stable learning rate?</summary>
+      <div class="ans">For quadratic loss \\(J(w)\\) with Hessian \\(H = 2X^TX/n\\), gradient descent is stable if \\(\\alpha < 2 / \\lambda_{\\text{max}}(H)\\), where \\(\\lambda_{\\text{max}}\\) is the largest eigenvalue of the Hessian. If it exceeds this, it diverges along the eigenvector corresponding to that eigenvalue.</div>
+    </details>
+    <div class="misconception">You might think a smaller learning rate is always safer. But in complex models (like deep neural networks), a very small learning rate can get stuck in sharp, suboptimal local minima or saddle points!</div>
+  `;
+
+  const slider = document.getElementById('w19_lr');
+  const val = document.getElementById('w19_lr_val');
+  const runBtn = document.getElementById('w19_run');
+  const resetBtn = document.getElementById('w19_reset');
+  const readout = document.getElementById('w19_readout');
+  const ch = document.getElementById('w19_ch');
+
+  let lr = Math.pow(10, parseFloat(slider.value));
+
+  // 1D problem: f(w) = w^2, f'(w) = 2w
+  const w0 = 4;
+  let w_hist_user = [], w_hist_small = [], w_hist_large = [];
+
+  function computeRuns() {
+    w_hist_user = [{w: w0, loss: w0*w0}];
+    w_hist_small = [{w: w0, loss: w0*w0}];
+    w_hist_large = [{w: w0, loss: w0*w0}];
+    let wu = w0, ws = w0, wl = w0;
+    let lru = lr, lrs = lr * 0.1, lrl = lr * 2.5;
+
+    for (let i = 0; i < 20; i++) {
+      wu = wu - lru * (2 * wu);
+      if (Math.abs(wu) > 1e4) wu = 1e4 * Math.sign(wu);
+      w_hist_user.push({w: wu, loss: wu*wu});
+
+      ws = ws - lrs * (2 * ws);
+      w_hist_small.push({w: ws, loss: ws*ws});
+
+      wl = wl - lrl * (2 * wl);
+      if (Math.abs(wl) > 1e4) wl = 1e4 * Math.sign(wl);
+      w_hist_large.push({w: wl, loss: wl*wl});
+    }
+  }
+
+  function draw() {
+    val.textContent = ML.fmt(lr, 4);
+
+    const w_range = [];
+    const loss_range = [];
+    for (let i = -5; i <= 5; i += 0.1) {
+      w_range.push(i);
+      loss_range.push(i*i);
+    }
+
+    const tr_bg = { x: w_range, y: loss_range, type: 'scatter', mode: 'lines', line: {color: '#ccc'}, name: 'f(w)=w²' };
+    
+    const tr_user = { x: w_hist_user.map(h=>h.w), y: w_hist_user.map(h=>h.loss), type: 'scatter', mode: 'lines+markers', line: {color: '#1F8A85'}, name: 'User LR' };
+    const tr_small = { x: w_hist_small.map(h=>h.w), y: w_hist_small.map(h=>h.loss), type: 'scatter', mode: 'lines+markers', line: {color: '#3B528B', dash:'dot'}, name: 'Small LR' };
+    const tr_large = { x: w_hist_large.map(h=>h.w), y: w_hist_large.map(h=>h.loss), type: 'scatter', mode: 'lines+markers', line: {color: '#B23A6B', dash:'dot'}, name: 'Large LR' };
+
+    Plotly.react('w19_plot_1d', [tr_bg, tr_small, tr_large, tr_user], ML.plotLayout({
+      title: 'Loss Landscape (1D)', xaxis: {range: [-5, 5], title: 'w'}, yaxis: {range: [0, 25], title: 'Loss'}
+    }), ML.plotConfig);
+
+    const iters = [...Array(21).keys()];
+    const loss_user = { x: iters, y: w_hist_user.map(h=>h.loss), type: 'scatter', mode: 'lines', line: {color: '#1F8A85'}, name: 'User LR' };
+    const loss_small = { x: iters, y: w_hist_small.map(h=>h.loss), type: 'scatter', mode: 'lines', line: {color: '#3B528B', dash:'dot'}, name: 'Small LR' };
+    const loss_large = { x: iters, y: w_hist_large.map(h=>h.loss), type: 'scatter', mode: 'lines', line: {color: '#B23A6B', dash:'dot'}, name: 'Large LR' };
+
+    Plotly.react('w19_plot_loss', [loss_small, loss_large, loss_user], ML.plotLayout({
+      title: 'Loss vs Iteration', xaxis: {title: 'Iteration'}, yaxis: {type: 'log', title: 'Loss (log scale)'}
+    }), ML.plotConfig);
+
+    if (w_hist_user[20].loss < 0.01) {
+      ch.classList.add('success');
+    } else {
+      ch.classList.remove('success');
+    }
+  }
+
+  const update = ML.throttledRedraw(() => {
+    lr = Math.pow(10, parseFloat(slider.value));
+    computeRuns();
+    draw();
+  });
+
+  slider.addEventListener('input', update);
+  runBtn.addEventListener('click', update);
+  resetBtn.addEventListener('click', () => { slider.value = -1; update(); });
+
+  document.getElementById('w19_p1').addEventListener('click', () => { slider.value = Math.log10(0.45); update(); });
+  document.getElementById('w19_p2').addEventListener('click', () => { slider.value = Math.log10(0.01); update(); });
+  document.getElementById('w19_p3').addEventListener('click', () => { slider.value = Math.log10(1.05); update(); });
+
+  update();
+});
+
+// ==========================================
+// WIDGET 20: Feature Scaling
+// ==========================================
+ML.lazyInit('w20_area', function() {
+  const area = document.getElementById('w20_area');
+  area.innerHTML = `
+    <p>When features have drastically different scales (e.g., age in years vs income in dollars), the loss contours become highly elliptical (stretched).</p>
+    <p>Gradient descent takes steps perpendicular to the contour lines. In an elliptical bowl, this means zigzagging slowly instead of pointing directly to the minimum.</p>
+    <p>By <strong>scaling</strong> the features (e.g., standardizing to mean 0, variance 1), the contours become circular, and the gradient points straight toward the center!</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>
+          Data Scaling:
+          <select id="w20_scale">
+            <option value="raw">Raw</option>
+            <option value="std">Standardized</option>
+            <option value="minmax">Min-Max [0,1]</option>
+          </select>
+        </label>
+        <label>
+          Inflate Feature 2: <span class="val" id="w20_inf_val">x1</span>
+          <input type="range" id="w20_inf" min="1" max="1000" step="1" value="1">
+        </label>
+        <button class="btn btn-primary" id="w20_run">Race GD (Raw vs Scaled)</button>
+        <div class="readout" id="w20_readout"></div>
+      </div>
+      <div>
+        <div id="w20_plot_contour" class="widget-plot" style="height: 350px;"></div>
+      </div>
+    </div>
+    <details class="check">
+      <summary>How does standardisation help mathematically?</summary>
+      <div class="ans">It improves the <strong>condition number</strong> of the matrix \\(X^TX\\). A high condition number (highly stretched contours) means the ratio of the largest to smallest eigenvalue is large, restricting the maximum stable learning rate while slowing convergence in flat directions. Standardizing brings the condition number closer to 1.</div>
+    </details>
+    <div class="misconception">A common mistake is scaling the test set independently of the training set. You must save the mean and standard deviation from the <em>training</em> set and apply those exact same values to the test set!</div>
+  `;
+
+  const selScale = document.getElementById('w20_scale');
+  const sldInf = document.getElementById('w20_inf');
+  const valInf = document.getElementById('w20_inf_val');
+  const btnRun = document.getElementById('w20_run');
+  const readout = document.getElementById('w20_readout');
+
+  let X = [], y = [];
+  const base_w = [2, -1.5]; // true w
+  for(let i=0; i<50; i++){
+    const x1 = Math.random()*4-2;
+    const x2 = Math.random()*4-2;
+    X.push([x1, x2]);
+    y.push(base_w[0]*x1 + base_w[1]*x2 + (Math.random()-0.5));
+  }
+
+  function getScaledData() {
+    const inf = parseFloat(sldInf.value);
+    const m = selScale.value;
+    valInf.textContent = 'x' + inf;
+
+    let x1s = X.map(r=>r[0]);
+    let x2s = X.map(r=>r[1] * inf);
+
+    if (m === 'std') {
+      x1s = ML.standardize(x1s).data;
+      x2s = ML.standardize(x2s).data;
+    } else if (m === 'minmax') {
+      x1s = ML.minmax(x1s).data;
+      x2s = ML.minmax(x2s).data;
+    }
+
+    const Xb = ML.designMatrix([x1s, x2s]);
+    return Xb;
+  }
+
+  function draw() {
+    const Xb = getScaledData();
+    const inf = parseFloat(sldInf.value);
+    
+    const XtX = ML.matmul(ML.transpose(Xb), Xb);
+    let cond = ML.conditionNumber(XtX);
+
+    readout.innerHTML = `Condition Number of \\(X^TX\\): <b>${ML.fmt(cond, 1)}</b>`;
+
+    // Calculate grid for contours
+    const grid_w1 = [], grid_w2 = [], z = [];
+    for(let w1=-3; w1<=3; w1+=0.2){
+      grid_w1.push(w1);
+      const row = [];
+      for(let w2=-3; w2<=3; w2+=0.2){
+        if(grid_w2.length < 31) grid_w2.push(w2);
+        row.push(ML.mseLoss(Xb, y, [0, w1, w2]));
+      }
+      z.push(row);
+    }
+
+    const contour = { z, x: grid_w2, y: grid_w1, type: 'contour', colorscale: 'Viridis', showscale: false };
+    
+    Plotly.react('w20_plot_contour', [contour], ML.plotLayout({
+      title: 'Loss Contours in Weight Space (w1 vs w2)',
+      xaxis: {title: 'w2'}, yaxis: {title: 'w1'}
+    }), ML.plotConfig);
+  }
+
+  const update = ML.throttledRedraw(() => {
+    draw();
+  });
+
+  selScale.addEventListener('change', update);
+  sldInf.addEventListener('input', update);
+  btnRun.addEventListener('click', () => {
+    const Xb = getScaledData();
+    const hist = ML.runGD(Xb, y, [0, -2, -2], 0.05, 50, ML.mseGradient, null);
+    
+    const traj = {
+      x: hist.map(h=>h.w[2]), y: hist.map(h=>h.w[1]),
+      type: 'scatter', mode: 'lines+markers', line: {color: '#B23A6B'}, name: 'GD Path'
+    };
+    
+    Plotly.addTraces('w20_plot_contour', traj);
+  });
+
+  update();
+});
+
+
+// ==========================================
+// WIDGET 21: Batch vs SGD vs Mini-batch
+// ==========================================
+ML.lazyInit('w21_area', function() {
+  const area = document.getElementById('w21_area');
+  area.innerHTML = `
+    <p>Standard Gradient Descent (<strong>Batch GD</strong>) calculates the gradient over the <em>entire</em> dataset before taking a step. This is accurate but very slow for large datasets.</p>
+    <p><strong>Stochastic Gradient Descent (SGD)</strong> uses a single data point per step. It's fast but extremely noisy, zigzagging its way to the minimum.</p>
+    <p><strong>Mini-batch GD</strong> is the sweet spot: using a small random subset of data (e.g., 32 or 64 points) per step. It balances speed and stability.</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>
+          Batch Size: <span class="val" id="w21_bs_val">16</span>
+          <input type="range" id="w21_bs" min="1" max="100" step="1" value="16">
+        </label>
+        <label>
+          <input type="checkbox" id="w21_shuf" checked> Shuffle Data
+        </label>
+        <button class="btn btn-primary" id="w21_run">Run All Three</button>
+        <div class="readout" id="w21_readout"></div>
+      </div>
+      <div>
+        <div id="w21_plot_contour" class="widget-plot" style="height: 300px;"></div>
+        <div id="w21_plot_loss" class="widget-plot" style="height: 250px; margin-top: 1rem;"></div>
+      </div>
+    </div>
+    <details class="check">
+      <summary>Why does SGD never fully settle down?</summary>
+      <div class="ans">Because at the true minimum of the overall loss, the gradient of any <em>individual</em> point is rarely zero. SGD will constantly bounce around the minimum. We fix this by gradually decreasing the learning rate over time (learning rate decay).</div>
+    </details>
+  `;
+
+  const sldBs = document.getElementById('w21_bs');
+  const valBs = document.getElementById('w21_bs_val');
+  const chkShuf = document.getElementById('w21_shuf');
+  const btnRun = document.getElementById('w21_run');
+  const readout = document.getElementById('w21_readout');
+
+  // Generate data
+  const data = ML.correlatedFeatures(100, 0.8, 42);
+  const X = ML.designMatrix([data.x1]);
+  const y = data.x1.map((x,i) => 2*x + data.x2[i]*0.5 + (Math.random()-0.5));
+
+  function draw() {
+    valBs.textContent = sldBs.value;
+    const bs = parseInt(sldBs.value);
+    
+    // Contours
+    const grid_w0 = [], grid_w1 = [], z = [];
+    for(let w1=0; w1<=4; w1+=0.2){
+      grid_w1.push(w1);
+      const row = [];
+      for(let w0=-2; w0<=2; w0+=0.2){
+        if(grid_w0.length < 21) grid_w0.push(w0);
+        row.push(ML.mseLoss(X, y, [w0, w1]));
+      }
+      z.push(row);
+    }
+    const contour = { z, x: grid_w0, y: grid_w1, type: 'contour', colorscale: 'Greys', showscale: false };
+    
+    // Run Batch (bs=100)
+    const hBatch = ML.runGD(X, y, [-1.5, 0.5], 0.1, 50, ML.mseGradient, 100);
+    // Run SGD (bs=1)
+    const hSGD = ML.runGD(X, y, [-1.5, 0.5], 0.1, 50, ML.mseGradient, 1, chkShuf.checked ? Math.random()*1000 : 0);
+    // Run Mini-batch
+    const hMini = ML.runGD(X, y, [-1.5, 0.5], 0.1, 50, ML.mseGradient, bs, chkShuf.checked ? Math.random()*1000 : 0);
+
+    const trBatch = {x: hBatch.map(h=>h.w[0]), y: hBatch.map(h=>h.w[1]), mode:'lines+markers', line:{color:'#1F8A85'}, name:'Batch'};
+    const trSGD = {x: hSGD.map(h=>h.w[0]), y: hSGD.map(h=>h.w[1]), mode:'lines', line:{color:'#B23A6B'}, name:'SGD'};
+    const trMini = {x: hMini.map(h=>h.w[0]), y: hMini.map(h=>h.w[1]), mode:'lines+markers', line:{color:'#3B528B'}, name:'Mini-batch'};
+
+    Plotly.react('w21_plot_contour', [contour, trBatch, trSGD, trMini], ML.plotLayout({
+      title: 'Optimization Path in Weight Space', xaxis: {title: 'w0 (Bias)'}, yaxis: {title: 'w1 (Slope)'}
+    }), ML.plotConfig);
+
+    const lossBatch = {x: hBatch.map(h=>h.iter), y: hBatch.map(h=>h.loss), mode:'lines', line:{color:'#1F8A85'}, name:'Batch'};
+    const lossSGD = {x: hSGD.map(h=>h.iter), y: hSGD.map(h=>h.loss), mode:'lines', line:{color:'#B23A6B'}, name:'SGD'};
+    const lossMini = {x: hMini.map(h=>h.iter), y: hMini.map(h=>h.loss), mode:'lines', line:{color:'#3B528B'}, name:'Mini-batch'};
+
+    Plotly.react('w21_plot_loss', [lossBatch, lossSGD, lossMini], ML.plotLayout({
+      title: 'Loss vs Iteration', xaxis: {title: 'Step'}, yaxis: {title: 'MSE'}
+    }), ML.plotConfig);
+  }
+
+  const update = ML.throttledRedraw(draw);
+  sldBs.addEventListener('input', update);
+  btnRun.addEventListener('click', update);
+
+  update();
+});
+
+
+// ==========================================
+// WIDGET 22: Bias-Variance
+// ==========================================
+ML.lazyInit('w22_area', function() {
+  const area = document.getElementById('w22_area');
+  area.innerHTML = `
+    <p>A simple model (like a line) might underfit complex data. It has high <strong>bias</strong> because it assumes too much (e.g. "the world is straight").</p>
+    <p>A complex model (like a degree 10 polynomial) can hit every data point perfectly. But it overfits, wiggling wildly between points. It has high <strong>variance</strong> because it is overly sensitive to the noise in the specific sample of data.</p>
+    <p>Try resampling the dataset multiple times to see how the model's predictions vary. The "spaghetti" of curves shows the variance.</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>
+          Polynomial Degree: <span class="val" id="w22_deg_val">1</span>
+          <input type="range" id="w22_deg" min="1" max="9" step="1" value="1">
+        </label>
+        <button class="btn btn-primary" id="w22_resample">Resample Dataset</button>
+        <button class="btn btn-reset" id="w22_clear">Clear History</button>
+      </div>
+      <div>
+        <div id="w22_plot_fit" class="widget-plot" style="height: 300px;"></div>
+        <div id="w22_plot_err" class="widget-plot" style="height: 250px; margin-top: 1rem;"></div>
+      </div>
+    </div>
+    <div class="misconception">Note that adding polynomial features (like \\(x^2, x^3\\)) still keeps the model <strong>linear</strong> in its parameters \\(w\\). We are just feeding it a fancier design matrix!</div>
+  `;
+
+  const sldDeg = document.getElementById('w22_deg');
+  const valDeg = document.getElementById('w22_deg_val');
+  const btnResample = document.getElementById('w22_resample');
+  const btnClear = document.getElementById('w22_clear');
+
+  let hists = [];
+  const trueFn = x => Math.sin(x*1.5);
+
+  function getPolyFeatures(xArr, degree) {
+    const feats = [];
+    for(let d=1; d<=degree; d++) feats.push(xArr.map(x=>Math.pow(x,d)));
+    return ML.designMatrix(feats);
+  }
+
+  function resampleAndFit(degree) {
+    // Generate data
+    const xArr = [], yArr = [];
+    for(let i=0; i<15; i++){
+      const x = Math.random()*4-2;
+      xArr.push(x);
+      yArr.push(trueFn(x) + ML.SeededRNG.prototype.normal(0, 0.3)); // using normal from an unseeded logic
+    }
+    const X = getPolyFeatures(xArr, degree);
+    const w = ML.olsSolve(X, yArr) || Array(degree+1).fill(0);
+    return {xArr, yArr, w};
+  }
+
+  function draw() {
+    const deg = parseInt(sldDeg.value);
+    valDeg.textContent = deg;
+
+    const px = [], py_true = [];
+    for(let x=-2; x<=2; x+=0.05) { px.push(x); py_true.push(trueFn(x)); }
+    
+    const traces = [{x: px, y: py_true, mode: 'lines', line: {color: 'black', width: 3, dash: 'dot'}, name: 'True Function'}];
+    
+    // Add spaghetti
+    hists.forEach((h, i) => {
+      const X_p = getPolyFeatures(px, h.deg);
+      const py = ML.matvec(X_p, h.w);
+      const opacity = i === hists.length - 1 ? 1 : 0.2;
+      traces.push({x: px, y: py, mode: 'lines', line: {color: '#1F8A85'}, opacity, showlegend: false});
+    });
+
+    if (hists.length > 0) {
+      const last = hists[hists.length-1];
+      traces.push({x: last.xArr, y: last.yArr, mode: 'markers', marker: {color: '#B23A6B', size: 8}, name: 'Latest Data'});
+    }
+
+    Plotly.react('w22_plot_fit', traces, ML.plotLayout({
+      title: 'Polynomial Fit', xaxis: {range: [-2,2]}, yaxis: {range: [-3,3]}
+    }), ML.plotConfig);
+
+    // Dummy total error chart to illustrate U-shape bias/variance
+    const dexs = [1,2,3,4,5,6,7,8,9];
+    const bias2 = dexs.map(d => Math.pow(Math.max(0, 6-d), 2)*0.05);
+    const varC = dexs.map(d => Math.pow(d, 2)*0.05);
+    const errT = dexs.map((d,i) => bias2[i] + varC[i] + 0.1);
+
+    Plotly.react('w22_plot_err', [
+      {x: dexs, y: errT, mode: 'lines+markers', line: {color: '#4A1E5C'}, name: 'Total Error'},
+      {x: dexs, y: bias2, mode: 'lines', line: {color: '#3B528B', dash: 'dash'}, name: 'Bias^2'},
+      {x: dexs, y: varC, mode: 'lines', line: {color: '#B23A6B', dash: 'dash'}, name: 'Variance'}
+    ], ML.plotLayout({
+      title: 'Theoretical Bias-Variance Tradeoff', xaxis: {title: 'Model Complexity (Degree)'}, yaxis: {title: 'Error'}
+    }), ML.plotConfig);
+  }
+
+  btnResample.addEventListener('click', () => {
+    const deg = parseInt(sldDeg.value);
+    hists.push({...resampleAndFit(deg), deg});
+    draw();
+  });
+
+  btnClear.addEventListener('click', () => {
+    hists = []; draw();
+  });
+  
+  sldDeg.addEventListener('input', () => {
+    hists = []; hists.push({...resampleAndFit(parseInt(sldDeg.value)), deg: parseInt(sldDeg.value)}); draw();
+  });
+
+  // initial
+  hists.push({...resampleAndFit(1), deg: 1});
+  draw();
+});
+
+
+// ==========================================
+// WIDGET 23: Validation
+// ==========================================
+ML.lazyInit('w23_area', function() {
+  const area = document.getElementById('w23_area');
+  area.innerHTML = `
+    <p>To know if we are overfitting, we must evaluate our model on data it has never seen. We split our data into <strong>Train</strong>, <strong>Validation</strong>, and <strong>Test</strong> sets.</p>
+    <p>Watch how the training error always goes down as complexity increases, but the validation error eventually goes up (the U-shaped curve).</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>
+          Polynomial Degree: <span class="val" id="w23_deg_val">1</span>
+          <input type="range" id="w23_deg" min="1" max="10" step="1" value="1">
+        </label>
+        <label>
+          <input type="checkbox" id="w23_leak"> Simulate Data Leakage
+        </label>
+      </div>
+      <div>
+        <div id="w23_plot_fit" class="widget-plot" style="height: 300px;"></div>
+        <div id="w23_plot_err" class="widget-plot" style="height: 250px; margin-top: 1rem;"></div>
+      </div>
+    </div>
+    <div class="challenge">
+      <div class="ch-title">Challenge: Find the best degree</div>
+      <p>Identify the degree that minimizes validation error without data leakage.</p>
+    </div>
+  `;
+
+  const sldDeg = document.getElementById('w23_deg');
+  const valDeg = document.getElementById('w23_deg_val');
+  const chkLeak = document.getElementById('w23_leak');
+
+  // Generate fixed dataset
+  const rng = new ML.SeededRNG(42);
+  const dataX = [], dataY = [];
+  for(let i=0; i<40; i++){
+    const x = Math.random()*4-2;
+    dataX.push(x);
+    dataY.push(Math.sin(x*1.5) + rng.normal(0, 0.4));
+  }
+  
+  const trainX = dataX.slice(0, 20), trainY = dataY.slice(0, 20);
+  const valX = dataX.slice(20, 30), valY = dataY.slice(20, 30);
+  const testX = dataX.slice(30, 40), testY = dataY.slice(30, 40);
+
+  let errHistTrain = [], errHistVal = [];
+
+  function draw() {
+    const deg = parseInt(sldDeg.value);
+    valDeg.textContent = deg;
+    const leak = chkLeak.checked;
+
+    function getFeatures(xArr) {
+      const feats = [];
+      for(let d=1; d<=deg; d++) feats.push(xArr.map(x=>Math.pow(x,d)));
+      let X = ML.designMatrix(feats);
+      if (leak) {
+        // "bad" standardization using the whole dataset implicitly by adding a bias term that artificially inflates performance
+        X = X.map(r => r.map(v => v * 0.8)); 
+      }
+      return X;
+    }
+
+    const Xtr = getFeatures(trainX);
+    const Xv = getFeatures(valX);
+    
+    // Regularization parameter to avoid singular matrix on high deg
+    const w = ML.ridgeSolve(Xtr, trainY, 1e-4) || Array(deg+1).fill(0);
+
+    const px = [];
+    for(let x=-2; x<=2; x+=0.05) px.push(x);
+    const Xp = getFeatures(px);
+    const py = ML.matvec(Xp, w);
+
+    Plotly.react('w23_plot_fit', [
+      {x: trainX, y: trainY, mode: 'markers', marker: {color: '#3B528B'}, name: 'Train'},
+      {x: valX, y: valY, mode: 'markers', marker: {color: '#1F8A85'}, name: 'Validation'},
+      {x: px, y: py, mode: 'lines', line: {color: '#4A1E5C'}, name: 'Model Fit'}
+    ], ML.plotLayout({
+      title: 'Train/Val Split Fit', xaxis: {range: [-2,2]}, yaxis: {range: [-3,3]}
+    }), ML.plotConfig);
+
+    // Compute error curve dynamically
+    const dexs = [], eTr=[], eV=[];
+    for(let d=1; d<=10; d++) {
+      function getF(arr) {
+        const feats = []; for(let i=1; i<=d; i++) feats.push(arr.map(x=>Math.pow(x,i)));
+        return ML.designMatrix(feats);
+      }
+      const X1 = getF(trainX); const X2 = getF(valX);
+      const wd = ML.ridgeSolve(X1, trainY, 1e-4) || Array(d+1).fill(0);
+      dexs.push(d);
+      eTr.push(ML.mseLoss(X1, trainY, wd));
+      let valLoss = ML.mseLoss(X2, valY, wd);
+      if(leak) valLoss *= 0.5; // Simulate artificial lowering
+      eV.push(valLoss);
+    }
+
+    Plotly.react('w23_plot_err', [
+      {x: dexs, y: eTr, mode: 'lines+markers', line: {color: '#3B528B'}, name: 'Train Error'},
+      {x: dexs, y: eV, mode: 'lines+markers', line: {color: '#1F8A85'}, name: 'Val Error'}
+    ], ML.plotLayout({
+      title: 'Learning Curve', xaxis: {title: 'Degree'}, yaxis: {range: [0, 2], title: 'MSE'}
+    }), ML.plotConfig);
+  }
+
+  const update = ML.throttledRedraw(draw);
+  sldDeg.addEventListener('input', update);
+  chkLeak.addEventListener('change', update);
+  update();
+});
+
+
+// ==========================================
+// WIDGET 24: Regularization
+// ==========================================
+ML.lazyInit('w24_area', function() {
+  const area = document.getElementById('w24_area');
+  area.innerHTML = `
+    <p><strong>Regularization</strong> prevents overfitting by adding a penalty for large weights to the loss function. It constrains the model.</p>
+    <p><strong>Ridge (L2)</strong> penalizes the squared weights (\\(w^2\\)). Geometrically, this forces the weights to stay inside a circle.</p>
+    <p><strong>Lasso (L1)</strong> penalizes the absolute weights (\\(|w|\\)). Geometrically, this forces weights into a diamond, which tends to drive some weights to exactly zero (feature selection)!</p>
+    <div class="widget-grid">
+      <div class="widget-controls">
+        <label>
+          Regularization Type:
+          <select id="w24_type">
+            <option value="l2">Ridge (L2)</option>
+            <option value="l1">Lasso (L1)</option>
+          </select>
+        </label>
+        <label>
+          Penalty Strength (\\(\\lambda\\)): <span class="val" id="w24_lam_val">0</span>
+          <input type="range" id="w24_lam" min="0" max="10" step="0.1" value="0">
+        </label>
+        <div class="readout" id="w24_readout"></div>
+      </div>
+      <div>
+        <div id="w24_plot_contour" class="widget-plot" style="height: 350px;"></div>
+      </div>
+    </div>
+    <details class="check">
+      <summary>Why does Lasso create sparse models (weights = 0)?</summary>
+      <div class="ans">The constraint region for L1 regularization is a diamond (or polytope in higher dimensions) with sharp corners that lie exactly on the axes. When the elliptical loss contours expand to touch this diamond, they are highly likely to hit a corner, meaning one or more weights will be exactly zero. L2 (Ridge) is a circle, lacking these sharp axis-aligned corners.</div>
+    </details>
+  `;
+
+  const selType = document.getElementById('w24_type');
+  const sldLam = document.getElementById('w24_lam');
+  const valLam = document.getElementById('w24_lam_val');
+  const readout = document.getElementById('w24_readout');
+
+  // data for contour
+  const X = ML.designMatrix([[1, 2, 3, 4], [4, 1, 2, 3]]);
+  const y = [1, 2, 3, 4]; // dummy
+
+  function draw() {
+    const lam = parseFloat(sldLam.value);
+    valLam.textContent = lam.toFixed(1);
+    const type = selType.value;
+
+    const grid_w1 = [], grid_w2 = [], z = [], zReg = [];
+    
+    // OLS minimum is roughly somewhere, let's just make a synthetic loss function for illustration
+    // Loss = (w1 - 2)^2 + 2*(w2 - 1)^2
+    for(let w1=-3; w1<=4; w1+=0.2){
+      grid_w1.push(w1);
+      const row = [], rowReg = [];
+      for(let w2=-3; w2<=4; w2+=0.2){
+        if(grid_w2.length < 36) grid_w2.push(w2);
+        
+        const mse = Math.pow(w1 - 2, 2) + 2*Math.pow(w2 - 1.5, 2);
+        row.push(mse);
+        
+        const reg = type === 'l2' ? (w1*w1 + w2*w2) : (Math.abs(w1) + Math.abs(w2));
+        rowReg.push(reg);
+      }
+      z.push(row);
+      zReg.push(rowReg);
+    }
+
+    const contourMse = { z, x: grid_w2, y: grid_w1, type: 'contour', colorscale: 'Greys', showscale: false, contours: {start:0.5, end: 20, size: 2} };
+    
+    // Constraint contour where penalty = lambda (only show if lambda > 0)
+    const traces = [contourMse];
+    if(lam > 0) {
+      traces.push({
+        z: zReg, x: grid_w2, y: grid_w1, type: 'contour', colorscale: [[0, '#9A8B1E'], [1, '#9A8B1E']], showscale: false,
+        contours: {type: 'constraint', operation: '<=', value: lam, showlines: true}, opacity: 0.3, name: 'Constraint'
+      });
+    }
+
+    // Find constrained minimum
+    // Using simple grid search for illustration
+    let minLoss = Infinity, bestW = [0,0];
+    if (lam === 0) {
+      bestW = [1.5, 2]; // True min (w2, w1 reversed in plot axes)
+    } else {
+      for(let i=0; i<grid_w1.length; i++) {
+        for(let j=0; j<grid_w2.length; j++) {
+          if (zReg[i][j] <= lam && z[i][j] < minLoss) {
+            minLoss = z[i][j];
+            bestW = [grid_w2[j], grid_w1[i]];
+          }
+        }
+      }
+    }
+
+    traces.push({
+      x: [bestW[0]], y: [bestW[1]], mode: 'markers', marker: {color: '#B23A6B', size: 10, symbol: 'star'}, name: 'Optimum'
+    });
+
+    readout.innerHTML = `Optimum Weights:<br>w1 = ${bestW[1].toFixed(2)}<br>w2 = ${bestW[0].toFixed(2)}`;
+
+    Plotly.react('w24_plot_contour', traces, ML.plotLayout({
+      title: 'Loss Landscape & Constraint Region', xaxis: {title: 'w2'}, yaxis: {title: 'w1'}
+    }), ML.plotConfig);
+  }
+
+  const update = ML.throttledRedraw(draw);
+  selType.addEventListener('change', update);
+  sldLam.addEventListener('input', update);
+  update();
+});
+
+
+// === MODULE 4 WIDGETS ===
+ML.lazyInit('w25_area', function(){
+  const area = document.getElementById('w25_area');
+
+  const html = `
+    <p>You've made it! This capstone playground brings together everything we've covered: data generation, feature scaling, model fitting (OLS & GD), and regularization.</p>
+    <p>Experiment with different datasets, scaling methods, and optimizers. Notice how unscaled data (like House Prices) causes problems for Gradient Descent unless you adjust the learning rate or apply feature scaling.</p>
+    
+    <div class="widget-grid" id="w25_grid">
+      <div class="widget-controls">
+        <label>Dataset
+          <select id="w25_dataset">
+            <option value="line">Noisy Line (1D)</option>
+            <option value="plane">Noisy Plane (2D)</option>
+            <option value="poly">Polynomial (1D)</option>
+            <option value="house">House Prices (2D, unscaled)</option>
+          </select>
+        </label>
+        <label>Feature Scaling
+          <select id="w25_scaling">
+            <option value="none">None</option>
+            <option value="standardize">Standardize</option>
+            <option value="minmax">Min-Max</option>
+          </select>
+        </label>
+        <label>Train Split %: <span class="val" id="w25_split_v">80</span>
+          <input type="range" id="w25_split" min="10" max="90" step="10" value="80">
+        </label>
+        <hr style="border:none; border-top:1px solid var(--rule); margin:0.5rem 0;">
+        <label>Optimizer
+          <select id="w25_opt">
+            <option value="closed">Closed-Form</option>
+            <option value="gd">Batch GD</option>
+            <option value="sgd">SGD (Batch=1)</option>
+            <option value="mini">Mini-Batch (Batch=16)</option>
+          </select>
+        </label>
+        <label>Learning Rate ($\alpha$): <span class="val" id="w25_lr_v">0.01</span>
+          <input type="range" id="w25_lr" min="-6" max="1" step="0.5" value="-2">
+        </label>
+        <label>Regularization
+          <select id="w25_reg">
+            <option value="none">None</option>
+            <option value="ridge">Ridge (L2)</option>
+            <option value="lasso">Lasso (L1)</option>
+          </select>
+        </label>
+        <label>Strength ($\lambda$): <span class="val" id="w25_lam_v">0.000</span>
+          <input type="range" id="w25_lam" min="-4" max="2" step="0.5" value="-4">
+        </label>
+        <div class="btn-group" style="margin-top:0.5rem;">
+          <button class="btn btn-primary" id="w25_run">Train Model</button>
+          <button class="btn btn-reset" id="w25_reset">New Data</button>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:1rem; min-width:0;">
+        <div class="widget-plot" id="w25_plot1" style="height:350px;"></div>
+        <div class="widget-plot" id="w25_plot2" style="height:250px;"></div>
+        <div class="readout" id="w25_readout">Run training to see results...</div>
+      </div>
+    </div>
+
+    <div class="module-divider" style="margin: 3rem auto 1.5rem;"><span class="mn">Module 4</span><h2>Knowledge Check</h2></div>
+    <div class="challenge" id="w25_quiz">
+      <div class="ch-title">Module Quiz</div>
+      <p style="margin-bottom:1rem; font-size:0.9rem;">Test your understanding of the concepts covered across these modules.</p>
+      <div id="w25_quiz_container" style="display:flex; flex-direction:column; gap:1.5rem;"></div>
+      <div class="ch-win" id="w25_quiz_result" style="font-size:1.1rem; text-align:center; padding:1rem; border:2px solid var(--teal); border-radius:4px; margin-top:1rem; background:rgba(31,138,133,0.1);"></div>
+    </div>
+  `;
+  area.innerHTML = html;
+  if(window.renderMathInElement) window.renderMathInElement(area);
+
+  // --- Elements ---
+  const selData = document.getElementById('w25_dataset');
+  const selScale = document.getElementById('w25_scaling');
+  const sSplit = document.getElementById('w25_split');
+  const vSplit = document.getElementById('w25_split_v');
+  const selOpt = document.getElementById('w25_opt');
+  const sLr = document.getElementById('w25_lr');
+  const vLr = document.getElementById('w25_lr_v');
+  const selReg = document.getElementById('w25_reg');
+  const sLam = document.getElementById('w25_lam');
+  const vLam = document.getElementById('w25_lam_v');
+  const btnRun = document.getElementById('w25_run');
+  const btnReset = document.getElementById('w25_reset');
+  const readout = document.getElementById('w25_readout');
+
+  // --- State ---
+  let rawData = {};
+  let trainData = {}, testData = {};
+  let modelResult = null; // { w, history }
+
+  const lassoGradient = (X, y, w, lam) => {
+    const g = ML.mseGradient(X, y, w);
+    return g.map((gi, i) => i === 0 ? gi : gi + lam * Math.sign(w[i]));
+  };
+
+  const getLam = () => parseFloat(sLam.value) <= -4 ? 0 : Math.pow(10, parseFloat(sLam.value));
+  const getLr = () => Math.pow(10, parseFloat(sLr.value));
+
+  function generateData() {
+    const type = selData.value;
+    const n = 200;
+    let x1, x2, y;
+    
+    if (type === 'line') {
+      const d = ML.noisyLine(n, 2, 1.5, 2);
+      x1 = d.x; y = d.y;
+    } else if (type === 'plane') {
+      const d = ML.noisyPlane(n, -1, 2, -1.5, 3);
+      x1 = d.x1; x2 = d.x2; y = d.y;
+    } else if (type === 'poly') {
+      const d = ML.polyWithNoise(n, [0, -1, 0.5, 0.1], 2);
+      x1 = d.x; y = d.y;
+    } else if (type === 'house') {
+      const d = ML.housePriceData(n);
+      x1 = d.sqft; x2 = d.beds; y = d.price;
+    }
+    
+    rawData = { x1, x2, y, type };
+    modelResult = null;
+    processData();
+    updatePlots();
+  }
+
+  function processData() {
+    const splitRatio = parseFloat(sSplit.value) / 100;
+    const n = rawData.y.length;
+    const nTrain = Math.floor(n * splitRatio);
+    
+    // Shuffle indices
+    const rng = new ML.SeededRNG(42);
+    const indices = rng.shuffle([...Array(n).keys()]);
+    const trainIdx = indices.slice(0, nTrain);
+    const testIdx = indices.slice(nTrain);
+
+    const subset = (arr, idx) => idx.map(i => arr[i]);
+    
+    let trX1 = subset(rawData.x1, trainIdx);
+    let teX1 = subset(rawData.x1, testIdx);
+    let trX2 = rawData.x2 ? subset(rawData.x2, trainIdx) : null;
+    let teX2 = rawData.x2 ? subset(rawData.x2, testIdx) : null;
+    let trY = subset(rawData.y, trainIdx);
+    let teY = subset(rawData.y, testIdx);
+
+    const scaleMode = selScale.value;
+    if (scaleMode !== 'none') {
+      const scaleFn = scaleMode === 'standardize' ? ML.standardize : ML.minmax;
+      const m1 = scaleFn(trX1);
+      trX1 = m1.data;
+      teX1 = scaleMode === 'standardize' ? teX1.map(v=>(v-m1.mean)/m1.std) : teX1.map(v=>(v-m1.min)/(m1.max-m1.min||1));
+      
+      if (trX2) {
+        const m2 = scaleFn(trX2);
+        trX2 = m2.data;
+        teX2 = scaleMode === 'standardize' ? teX2.map(v=>(v-m2.mean)/m2.std) : teX2.map(v=>(v-m2.min)/(m2.max-m2.min||1));
+      }
+    }
+
+    let trF, teF;
+    if (rawData.type === 'poly') {
+      trF = [trX1, trX1.map(x=>x*x), trX1.map(x=>Math.pow(x,3))];
+      teF = [teX1, teX1.map(x=>x*x), teX1.map(x=>Math.pow(x,3))];
+    } else if (trX2) {
+      trF = [trX1, trX2];
+      teF = [teX1, teX2];
+    } else {
+      trF = [trX1];
+      teF = [teX1];
+    }
+
+    trainData = { X: ML.designMatrix(trF), y: trY, x1: trX1, x2: trX2 };
+    testData = { X: ML.designMatrix(teF), y: teY, x1: teX1, x2: teX2 };
+  }
+
+  function trainModel() {
+    processData();
+    
+    const opt = selOpt.value;
+    const reg = selReg.value;
+    const lr = getLr();
+    const lam = getLam();
+    const X = trainData.X;
+    const y = trainData.y;
+    
+    let w = ML.zeros(X[0].length, 1).map(r=>0);
+    let history = [];
+
+    if (opt === 'closed') {
+      if (reg === 'none' || reg === 'lasso') {
+        if (reg === 'lasso') alert("Closed-form Lasso is not available. Using OLS (None).");
+        w = ML.olsSolve(X, y) || w;
+      } else if (reg === 'ridge') {
+        w = ML.ridgeSolve(X, y, lam) || w;
+      }
+      history = [{w: [...w], loss: ML.mseLoss(X, y, w), iter: 1}];
+    } else {
+      const maxIter = opt === 'sgd' ? 1000 : 300;
+      let batchSize = X.length;
+      if (opt === 'sgd') batchSize = 1;
+      if (opt === 'mini') batchSize = 16;
+      
+      let gradFn = ML.mseGradient;
+      if (reg === 'ridge') gradFn = (Xx,yy,ww) => ML.ridgeGradient(Xx,yy,ww,lam);
+      if (reg === 'lasso') gradFn = (Xx,yy,ww) => lassoGradient(Xx,yy,ww,lam);
+      
+      history = ML.runGD(X, y, w, lr, maxIter, gradFn, batchSize);
+      if (history.length > 0) w = history[history.length - 1].w;
+    }
+    
+    modelResult = { w, history };
+    updatePlots();
+  }
+
+  function updatePlots() {
+    const is3D = !!trainData.x2;
+    const p1 = document.getElementById('w25_plot1');
+    const p2 = document.getElementById('w25_plot2');
+
+    const traces1 = [];
+    
+    if (is3D) {
+      traces1.push({
+        x: trainData.x1, y: trainData.x2, z: trainData.y,
+        mode: 'markers', type: 'scatter3d',
+        marker: { size: 3, color: ML.plotColors.data },
+        name: 'Train'
+      });
+      traces1.push({
+        x: testData.x1, y: testData.x2, z: testData.y,
+        mode: 'markers', type: 'scatter3d',
+        marker: { size: 3, color: ML.plotColors.residual },
+        name: 'Test'
+      });
+      
+      if (modelResult) {
+        const xMin = Math.min(...trainData.x1, ...testData.x1);
+        const xMax = Math.max(...trainData.x1, ...testData.x1);
+        const yMin = Math.min(...trainData.x2, ...testData.x2);
+        const yMax = Math.max(...trainData.x2, ...testData.x2);
+        
+        const gx=[], gy=[], gz=[];
+        for(let i=0; i<10; i++){
+          let rowZ=[];
+          let vy = yMin + i*(yMax-yMin)/9;
+          for(let j=0; j<10; j++){
+            let vx = xMin + j*(xMax-xMin)/9;
+            if(i===0) gx.push(vx);
+            rowZ.push(modelResult.w[0] + modelResult.w[1]*vx + modelResult.w[2]*vy);
+          }
+          gy.push(vy);
+          gz.push(rowZ);
+        }
+        traces1.push({
+          x: gx, y: gy, z: gz,
+          type: 'surface', showscale: false,
+          colorscale: [[0, ML.plotColors.model], [1, '#45B5B0']],
+          opacity: 0.7, name: 'Model'
+        });
+      }
+      Plotly.react(p1, traces1, {
+        margin: {l:0,r:0,t:0,b:0},
+        scene: {
+          xaxis: {title: 'X1'}, yaxis: {title: 'X2'}, zaxis: {title: 'Y'}
+        }
+      }, ML.plotConfig);
+    } else {
+      traces1.push({
+        x: trainData.x1, y: trainData.y,
+        mode: 'markers', type: 'scatter',
+        marker: { size: 6, color: ML.plotColors.data },
+        name: 'Train'
+      });
+      traces1.push({
+        x: testData.x1, y: testData.y,
+        mode: 'markers', type: 'scatter',
+        marker: { size: 6, color: ML.plotColors.residual, symbol: 'cross' },
+        name: 'Test'
+      });
+      
+      if (modelResult) {
+        const xMin = Math.min(...trainData.x1, ...testData.x1);
+        const xMax = Math.max(...trainData.x1, ...testData.x1);
+        const gx = [];
+        for(let i=0; i<=50; i++) gx.push(xMin + i*(xMax-xMin)/50);
+        
+        const gy = gx.map(vx => {
+          let row = [1, vx];
+          if (rawData.type === 'poly') row.push(vx*vx, Math.pow(vx,3));
+          return ML.dot(modelResult.w, row);
+        });
+        
+        traces1.push({
+          x: gx, y: gy, mode: 'lines',
+          line: { color: ML.plotColors.model, width: 3 },
+          name: 'Model'
+        });
+      }
+      Plotly.react(p1, traces1, ML.plotLayout({ title: 'Data & Fit', margin: {l:40, r:20, t:30, b:40} }), ML.plotConfig);
+    }
+
+    if (modelResult && modelResult.history.length > 1) {
+      const iters = modelResult.history.map(h => h.iter);
+      const losses = modelResult.history.map(h => h.loss);
+      
+      const testLosses = [];
+      const step = Math.max(1, Math.floor(iters.length / 100));
+      const pIters = [], pTr = [], pTe = [];
+      
+      for(let i=0; i<iters.length; i+=step) {
+        pIters.push(iters[i]);
+        pTr.push(losses[i]);
+        pTe.push(ML.mseLoss(testData.X, testData.y, modelResult.history[i].w));
+      }
+      
+      Plotly.react(p2, [
+        { x: pIters, y: pTr, mode: 'lines', name: 'Train Loss', line: {color: ML.plotColors.data} },
+        { x: pIters, y: pTe, mode: 'lines', name: 'Test Loss', line: {color: ML.plotColors.residual} }
+      ], ML.plotLayout({
+        title: 'Loss Curve',
+        yaxis: { type: Math.max(...pTr) / Math.min(...pTr) > 100 ? 'log' : 'linear' },
+        margin: {l:50, r:20, t:30, b:40}
+      }), ML.plotConfig);
+    } else {
+      Plotly.purge(p2);
+    }
+
+    if (modelResult) {
+      const trLoss = ML.mseLoss(trainData.X, trainData.y, modelResult.w);
+      const teLoss = ML.mseLoss(testData.X, testData.y, modelResult.w);
+      const r2 = ML.rSquared(testData.X, testData.y, modelResult.w);
+      
+      let ws = modelResult.w.map(vw => ML.fmt(vw, 3)).join(', ');
+      
+      let warn = '';
+      if (!isFinite(trLoss) || trLoss > 1e10) {
+        warn = '<br><span style="color:var(--rose);font-weight:bold;">⚠ Model diverged! Try lowering the learning rate or applying feature scaling.</span>';
+      }
+      
+      readout.innerHTML = `<b>Train MSE:</b> ${ML.fmt(trLoss, 2)} | <b>Test MSE:</b> ${ML.fmt(teLoss, 2)}
+<b>Test R²:</b> ${ML.fmt(r2, 3)}
+<b>Weights:</b> [${ws}]${warn}`;
+    } else {
+      readout.innerHTML = 'Run training to see results...';
+    }
+  }
+
+  const doUpdate = ML.throttledRedraw(trainModel);
+  
+  selData.addEventListener('change', generateData);
+  btnReset.addEventListener('click', generateData);
+  btnRun.addEventListener('click', trainModel);
+  
+  sLr.addEventListener('input', () => { vLr.textContent = ML.fmt(getLr(), 4); doUpdate(); });
+  sLam.addEventListener('input', () => { vLam.textContent = parseFloat(sLam.value)<=-4 ? '0' : ML.fmt(getLam(), 4); doUpdate(); });
+  sSplit.addEventListener('input', () => { vSplit.textContent = sSplit.value; doUpdate(); });
+  
+  selScale.addEventListener('change', doUpdate);
+  selOpt.addEventListener('change', doUpdate);
+  selReg.addEventListener('change', doUpdate);
+
+  generateData();
+
+  const quizQuestions = [
+    {
+      q: "1. What does each row of the design matrix X represent?",
+      options: [
+        "A single feature across all samples",
+        "A single data point (sample) with all its features",
+        "The model weights to be learned",
+        "The target values for the dataset"
+      ],
+      ans: 1
+    },
+    {
+      q: "2. What does the bias column of ones let the model do?",
+      options: [
+        "Speed up gradient descent",
+        "Scale features between 0 and 1",
+        "Shift the prediction line/plane away from the origin (0,0)",
+        "Prevent the model from overfitting"
+      ],
+      ans: 2
+    },
+    {
+      q: "3. What happens to Gradient Descent if the learning rate is too large?",
+      options: [
+        "It converges exactly in one step",
+        "It takes a very long time to reach the minimum",
+        "It overshoots the minimum and may diverge to infinity",
+        "It automatically switches to a closed-form solution"
+      ],
+      ans: 2
+    },
+    {
+      q: "4. Why do we scale features before applying gradient descent?",
+      options: [
+        "To make the loss landscape more circular/spherical for faster convergence",
+        "Because OLS requires features to be between 0 and 1",
+        "To reduce the number of features in the dataset",
+        "To increase the complexity of the model"
+      ],
+      ans: 0
+    },
+    {
+      q: "5. What's the main difference between Batch GD and SGD?",
+      options: [
+        "Batch GD uses random subsets, SGD uses the whole dataset",
+        "SGD updates weights using one data point at a time, Batch GD uses all points",
+        "SGD can only be used for classification, Batch GD for regression",
+        "Batch GD always finds a worse solution than SGD"
+      ],
+      ans: 1
+    },
+    {
+      q: "6. If a model has very low training error but high test/validation error, what is the likely problem?",
+      options: [
+        "Underfitting (High Bias)",
+        "Overfitting (High Variance)",
+        "The learning rate was too small",
+        "The model needs fewer features"
+      ],
+      ans: 1
+    },
+    {
+      q: "7. Ridge regression (L2) adds what penalty to the loss function?",
+      options: [
+        "The sum of absolute weights",
+        "The sum of squared weights",
+        "The number of non-zero weights",
+        "The inverse of the weights"
+      ],
+      ans: 1
+    },
+    {
+      q: "8. What does the Lasso penalty (L1) encourage that Ridge does not?",
+      options: [
+        "Faster convergence of gradient descent",
+        "Larger weight values",
+        "Exact zero weights (feature selection / sparsity)",
+        "Closed-form analytical solutions"
+      ],
+      ans: 2
+    }
+  ];
+
+  const qContainer = document.getElementById('w25_quiz_container');
+  const qResult = document.getElementById('w25_quiz_result');
+  let score = 0;
+  let answered = new Array(quizQuestions.length).fill(false);
+
+  quizQuestions.forEach((qObj, idx) => {
+    const qDiv = document.createElement('div');
+    qDiv.style.background = 'var(--panel)';
+    qDiv.style.padding = '1rem';
+    qDiv.style.borderRadius = 'var(--radius)';
+    
+    const qText = document.createElement('div');
+    qText.style.fontWeight = '600';
+    qText.style.marginBottom = '0.5rem';
+    qText.textContent = qObj.q;
+    qDiv.appendChild(qText);
+
+    const optsDiv = document.createElement('div');
+    optsDiv.style.display = 'flex';
+    optsDiv.style.flexDirection = 'column';
+    optsDiv.style.gap = '0.4rem';
+    
+    qObj.options.forEach((optStr, optIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.style.justifyContent = 'flex-start';
+      btn.style.textAlign = 'left';
+      btn.style.fontWeight = 'normal';
+      btn.textContent = optStr;
+      
+      btn.addEventListener('click', () => {
+        if (answered[idx]) return;
+        answered[idx] = true;
+        
+        const allBtns = optsDiv.querySelectorAll('button');
+        allBtns.forEach((b, i) => {
+          b.disabled = true;
+          if (i === qObj.ans) {
+            b.style.background = 'rgba(31,138,133,0.2)';
+            b.style.borderColor = 'var(--teal)';
+            b.style.color = 'var(--teal)';
+            b.style.fontWeight = 'bold';
+          }
+        });
+
+        if (optIdx === qObj.ans) {
+          score++;
+        } else {
+          btn.style.background = 'rgba(178,58,107,0.2)';
+          btn.style.borderColor = 'var(--rose)';
+          btn.style.color = 'var(--rose)';
+        }
+        
+        checkFinish();
+      });
+      optsDiv.appendChild(btn);
+    });
+
+    qDiv.appendChild(optsDiv);
+    qContainer.appendChild(qDiv);
+  });
+
+  function checkFinish() {
+    if (answered.every(v => v)) {
+      qResult.style.display = 'block';
+      let msg = '';
+      if (score === 8) msg = 'Perfect! You are an ML champion! 🏆';
+      else if (score >= 6) msg = 'Great job! You have a solid grasp of the fundamentals. 👏';
+      else if (score >= 4) msg = 'Good effort! You might want to review some sections to solidify your understanding. 👍';
+      else msg = 'Keep learning! Feel free to revisit the earlier modules and try again. 📚';
+      
+      qResult.innerHTML = `You scored <b>${score} / 8</b>.<br>${msg}`;
+      document.getElementById('w25_quiz').classList.add('success');
+    }
+  }
+
+});
+
+</script>
+</body>
+</html>
